@@ -10,12 +10,15 @@ import { CustomBreadCrumb } from "@/components/custom-bread-crumb";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Lightbulb } from "lucide-react";
 import { QuestionSection } from "@/components/question-section";
+import { RecordSkillAnswer } from "@/components/record-skill-answer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const MockInterviewPage = () => {
   const { interviewId } = useParams<{ interviewId: string }>();
   const [interview, setInterview] = useState<Interview | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isWebCam, setIsWebCam] = useState(true);
 
   const navigate = useNavigate();
 
@@ -54,6 +57,8 @@ export const MockInterviewPage = () => {
     navigate("/generate", { replace: true });
   }
 
+  const hasSkillQuestions = interview?.skillQuestions && interview.skillQuestions.length > 0;
+
   return (
     <div className="flex flex-col w-full gap-8 py-5">
       <CustomBreadCrumb
@@ -88,11 +93,41 @@ export const MockInterviewPage = () => {
         </Alert>
       </div>
 
-      {interview?.questions && interview?.questions.length > 0 && (
+      {/* Tabs for different question types */}
+      {hasSkillQuestions && interview?.questions && interview.questions.length > 0 ? (
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="general">General Questions</TabsTrigger>
+            <TabsTrigger value="skills">Skill-Based Questions</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="general" className="mt-6">
+            {interview?.questions && interview?.questions.length > 0 && (
+              <div className="mt-4 w-full flex flex-col items-start gap-4">
+                <QuestionSection questions={interview?.questions} />
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="skills" className="mt-6">
+            {interview?.skillQuestions && interview?.skillQuestions.length > 0 && (
+              <RecordSkillAnswer
+                questions={interview.skillQuestions.map((q) => ({
+                  skill: q.skill,
+                  question: q.question,
+                  expectedAnswer: q.expectedAnswer,
+                }))}
+                isWebCam={isWebCam}
+                setIsWebCam={setIsWebCam}
+              />
+            )}
+          </TabsContent>
+        </Tabs>
+      ) : interview?.questions && interview?.questions.length > 0 ? (
         <div className="mt-4 w-full flex flex-col items-start gap-4">
           <QuestionSection questions={interview?.questions} />
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

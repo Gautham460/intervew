@@ -1,0 +1,967 @@
+\documentclass{fisatinternship}
+
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{array}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue
+}
+
+\setlist{nosep}
+
+%------------------------------------------------
+% TITLE PAGE DETAILS (FROM CLASS FILE)
+%------------------------------------------------
+
+\title{Intervue -- AI Mock Interview \& Career Readiness Platform}
+
+\team{    
+    Gautham Krishna -- FIT23CSD028 \\
+    Hussain -- FIT23CSD041 \\
+    safwan -- FIT23CSD053\\
+}
+
+\guide{Dr. Shimy Joseph}
+
+\begin{document}
+
+\maketitle
+\newpage
+\pagenumbering{roman}
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+%------------------------------------------------
+
+\newpage
+
+%------------------------------------------------
+\chapter{Introduction}
+
+\section{Purpose}
+This document specifies the Software Requirements for \textbf{Intervue}, a full-stack
+AI-powered mock interview and career readiness platform. It describes the system's
+functional and non-functional requirements, external interfaces, data requirements, and
+system models, and is intended to serve as the definitive reference for design,
+development, testing, and deployment activities.
+
+\section{Document Conventions}
+\begin{itemize}
+  \item All mandatory requirements use the word \textbf{"shall"}.
+  \item Functional Requirements use IDs of the form \textbf{FR-XXX-NNN} (e.g., FR-AUTH-001).
+  \item Non-Functional Requirements use IDs of the form \textbf{NFR-XXX-NNN} (e.g., NFR-PERF-001).
+  \item Priority levels: \textbf{High} / \textbf{Medium} / \textbf{Low}.
+  \item \texttt{Monospace} font denotes code identifiers, routes, or configuration keys.
+\end{itemize}
+
+\section{Intended Audience}
+\begin{itemize}
+  \item \textbf{Developer / Author:} Pagau S (primary developer and system architect)
+  \item \textbf{Project Guide:} Dr.\ Reshmi R
+  \item \textbf{Evaluators:} Review panels at First, Second, Third, and Final reviews
+  \item \textbf{End Users:} Candidates preparing for technical interviews; enterprise
+        hiring managers; university career-centre staff
+\end{itemize}
+
+\section{Product Scope}
+Intervue addresses the gap in realistic, on-demand mock interview preparation. Existing
+tools are siloed: resume builders, coding platforms, and scheduling apps live in separate
+products with no shared context. Intervue unifies:
+\begin{itemize}
+  \item AI-driven mock interviews with adaptive Gemini-powered question generation and scoring
+  \item Real-time collaborative coding via Monaco Editor with built-in video/audio
+  \item Proctored interview mode with eye-tracking and tab-switch violation detection
+  \item Resume builder with live preview, AI gap analysis, and PDF export
+  \item Enterprise admin portal with Firestore-backed secret-code access control and
+        organisation-wide candidate analytics
+\end{itemize}
+The platform is deployed at \url{https://intervue.vercel.app} on Vercel, backed by
+Firebase Firestore and Clerk authentication.
+
+\section{References}
+\begin{enumerate}
+  \item React Documentation, Meta Platforms Inc., \url{https://react.dev}, 2024
+  \item Vite Documentation, \url{https://vitejs.dev}, 2024
+  \item Firebase Documentation, Google LLC, \url{https://firebase.google.com/docs}, 2024
+  \item Google Gemini API Reference, Google DeepMind, \url{https://ai.google.dev/docs}, 2024
+  \item Clerk Documentation, \url{https://clerk.com/docs}, 2024
+  \item Monaco Editor, Microsoft, \url{https://github.com/microsoft/monaco-editor}, 2024
+  \item OWASP Authentication Cheat Sheet, \url{https://cheatsheetseries.owasp.org}, 2024
+  \item Framer Motion Documentation, \url{https://www.framer.com/motion}, 2024
+  \item shadcn/ui Documentation, \url{https://ui.shadcn.com}, 2024
+  \item Vitest Documentation, \url{https://vitest.dev}, 2024
+  \item html2canvas, \url{https://html2canvas.hertzen.com}, 2024
+  \item jsPDF, \url{https://github.com/parallax/jsPDF}, 2024
+  \item Recharts, \url{https://recharts.org}, 2024
+  \item IEEE Std 830-1998, \textit{IEEE Recommended Practice for Software Requirements
+        Specifications}, IEEE, 1998
+\end{enumerate}
+
+%------------------------------------------------
+\chapter{Overall Description}
+
+\section{Product Perspective}
+Intervue is a \textbf{cloud-native, single-page web application} (SPA) built with
+React~18 and TypeScript, bundled by Vite~4, and deployed on Vercel. It operates entirely
+in the browser with no proprietary backend server; all persistence is handled by
+Firebase Firestore (NoSQL), authentication by Clerk, and AI inference by the Google
+Gemini~1.5-Flash REST API.
+
+\begin{itemize}
+  \item \textbf{Frontend:} React~18 (TypeScript), Vite~4, TailwindCSS, shadcn/ui,
+        Framer Motion, Monaco Editor, Recharts, html2canvas, jsPDF
+  \item \textbf{Authentication:} Clerk (OAuth, JWT session tokens, role metadata,
+        dark-branded UI via \texttt{@clerk/themes})
+  \item \textbf{Database:} Firebase Firestore (NoSQL, real-time, \texttt{userId}-scoped security rules)
+  \item \textbf{AI Layer:} Google Gemini~1.5-Flash via \texttt{@google/generative-ai} SDK
+  \item \textbf{Hosting / CI-CD:} Vercel -- auto-deploy on \texttt{git push main}
+\end{itemize}
+
+\section{Product Functions}
+The system is grouped into six high-level modules:
+\begin{itemize}
+  \item \textbf{Authentication \& Role Routing Module} -- Clerk sign-in/sign-up,
+        role-selection screen, \texttt{ProtectRoutes} and \texttt{AdminRoute} guards
+  \item \textbf{Mock Interview Module} -- AI question generation, answer recording,
+        Gemini scoring, feedback reports, analytics, badges
+  \item \textbf{Collaboration Module} -- Real-time shared Monaco Editor, browser-safe
+        code execution, MediaDevices camera/mic, clipboard invite
+  \item \textbf{Proctored Interview Module} -- Eye-tracking overlay, tab-switch detection,
+        integrity timer, violation reports
+  \item \textbf{Resume Builder \& Analyser Module} -- Drag-and-drop profile editor,
+        live preview, AI gap analysis, PDF export
+  \item \textbf{Enterprise Admin Module} -- Secret-code-gated access (Firestore verified),
+        organisation analytics dashboard, candidate pipeline, setup management
+\end{itemize}
+
+\section{User Classes and Characteristics}
+
+\begin{longtable}{|p{3.2cm}|p{6cm}|p{2.5cm}|}
+\hline
+\textbf{User Type} & \textbf{Description} & \textbf{Technical Level} \\
+\hline
+\endhead
+Candidate &
+  Final-year students, job-seekers, or bootcamp graduates who set up mock interviews,
+  view AI feedback, use the AI Coach, build resumes, and participate in collaborative
+  coding sessions. &
+  Beginner -- Intermediate \\
+\hline
+Enterprise Admin &
+  Hiring managers or university career-centre staff who access the organisation-level
+  analytics dashboard, browse the candidate pipeline, and manage system settings.
+  Must be pre-authorised via a Firestore-stored secret code. &
+  Intermediate \\
+\hline
+Guest / Unauthenticated &
+  Visitors who land on the public landing page. They can read about features and
+  initiate sign-up, but cannot access any protected routes. &
+  Any \\
+\hline
+\end{longtable}
+
+\section{Operating Environment}
+\begin{itemize}
+  \item \textbf{Operating System:} Windows 10+, macOS 12+, Linux (any modern distro)
+  \item \textbf{Browser:} Google Chrome 90+, Mozilla Firefox 88+, Microsoft Edge 90+
+        (Chrome recommended for MediaDevices compatibility)
+  \item \textbf{Internet Connection:} Minimum 2~Mbps; camera/mic required for proctored
+        mode and collaborative video
+  \item \textbf{Hardware:} Intel Core i3+ or Apple M1+; 4~GB RAM minimum;
+        webcam \& microphone for proctored/collab sessions
+  \item \textbf{Development Environment:} Node.js~18+, npm, Git, Firebase CLI,
+        Clerk Dashboard account, Google AI Studio API key
+\end{itemize}
+
+\section{Design and Implementation Constraints}
+\begin{itemize}
+  \item The Gemini~1.5-Flash free tier is subject to rate limits (approximately 15 RPM
+        and 1M tokens/day); production scale requires a paid quota.
+  \item Code execution in the Collaboration module is restricted to JavaScript and
+        TypeScript via browser \texttt{eval()} -- server-side execution engines are
+        out of scope for the current version.
+  \item Firebase Firestore Spark (free) plan caps reads/writes; exceeding limits requires
+        upgrade to Blaze (pay-as-you-go).
+  \item Clerk free tier supports up to 10,000 Monthly Active Users.
+  \item No native mobile application is in scope; the SPA must be responsive on mobile
+        browsers.
+  \item All secret codes are stored as plaintext in Firestore in the current
+        implementation (hashing is a future enhancement).
+\end{itemize}
+
+\section{Assumptions and Dependencies}
+\begin{itemize}
+  \item Users have a stable internet connection for Firestore real-time queries and
+        Gemini API calls.
+  \item Clerk, Firebase, Gemini, and Vercel external services remain available and
+        backward-compatible with the SDK versions used.
+  \item The Enterprise admin code is initialised in Firestore via the
+        \texttt{initializeAdminCode()} utility before the first enterprise login.
+  \item Browser permissions for camera and microphone are granted by the user for
+        proctored mode and collaborative sessions.
+  \item The \texttt{VITE\_CLERK\_PUBLISHABLE\_KEY}, \texttt{VITE\_FIREBASE\_*},
+        and \texttt{VITE\_GEMINI\_API\_KEY} environment variables are correctly
+        configured in \texttt{.env}.
+\end{itemize}
+
+%------------------------------------------------
+\chapter{External Interface Requirements}
+
+\section{User Interfaces}
+The application follows a \textbf{dark-theme design system} with obsidian-black backgrounds
+and teal-mint gradient accents (\texttt{\#017373} to \texttt{\#AAD9D1}).
+Key screens include:
+\begin{enumerate}
+  \item \textbf{Landing Page} -- Hero section with animated call-to-action and features grid
+  \item \textbf{Role Selection Screen} -- Animated Candidate / Enterprise selection cards
+  \item \textbf{Sign In / Sign Up} -- Clerk-rendered, dark-branded authentication forms
+  \item \textbf{Candidate Dashboard} -- Streak, recent interviews, badges, quick-start actions
+  \item \textbf{Mock Interview Session} -- Question panel, answer recorder, AI Coach sidebar
+  \item \textbf{Collaboration Editor} -- Monaco Editor, terminal output panel, camera/mic toggles
+  \item \textbf{Resume Builder} -- Two-column layout: form inputs + live PDF preview
+  \item \textbf{Enterprise Dashboard} -- Org analytics charts, candidate pipeline table, setup page
+\end{enumerate}
+All UI components use shadcn/ui with Lucide React icons and Framer Motion transitions.
+
+\section{Hardware Interfaces}
+\begin{itemize}
+  \item \textbf{Webcam:} Accessed via \texttt{navigator.mediaDevices.getUserMedia\{video:true\}}
+        for proctored mode eye-tracking and collaborative session video.
+  \item \textbf{Microphone:} Accessed via \texttt{getUserMedia\{audio:true\}} for collaborative
+        audio; toggled on/off with stream track cleanup.
+  \item No direct hardware peripheral drivers or embedded device interfaces are required.
+\end{itemize}
+
+\section{Software Interfaces}
+
+\begin{longtable}{|p{3cm}|p{3.5cm}|p{5.5cm}|}
+\hline
+\textbf{Service} & \textbf{SDK / Library} & \textbf{Purpose} \\
+\hline
+\endhead
+Firebase Firestore & \texttt{firebase} v10 & NoSQL document store for interviews,
+  answers, study plans, resume profiles, group sessions, badges, admin codes \\
+\hline
+Clerk & \texttt{@clerk/clerk-react} & Authentication, JWT session tokens,
+  role metadata (\texttt{publicMetadata.role}) \\
+\hline
+Google Gemini AI & \texttt{@google/generative-ai} & Question generation, answer
+  scoring, AI Coach hints, study plan creation, resume gap analysis \\
+\hline
+Vercel & Vercel CLI / GitHub integration & Static SPA hosting, CDN, auto SSL,
+  CI/CD on \texttt{git push main} \\
+\hline
+Monaco Editor & \texttt{@monaco-editor/react} & Browser-embedded code editor with
+  syntax highlighting for Collaboration module \\
+\hline
+html2canvas + jsPDF & Open-source npm & Client-side PDF export of resume preview \\
+\hline
+\end{longtable}
+
+\section{Communication Interfaces}
+\begin{itemize}
+  \item \textbf{HTTPS:} All communication with Clerk, Firebase, Gemini, and
+        Vercel is over TLS 1.2+ (HTTPS).
+  \item \textbf{Firestore WebSocket:} Real-time Firestore listeners use WebSocket
+        connections managed by the Firebase SDK.
+  \item \textbf{Gemini REST:} AI calls use HTTPS REST (POST) to
+        \url{https://generativelanguage.googleapis.com}.
+  \item \textbf{Clipboard API:} \texttt{navigator.clipboard.writeText()} used for
+        session invite links in the Collaboration module.
+  \item No custom email server, SMS gateway, or push-notification service is
+        integrated in the current version.
+\end{itemize}
+
+%------------------------------------------------
+\chapter{Functional Requirements}
+
+\section{Authentication \& Role Routing Module}
+
+\subsection{Role Selection}
+\textbf{Requirement ID:} FR-AUTH-001\\
+\textbf{Description:} The system shall display a role-selection screen (\texttt{/select-role})
+presenting animated Candidate and Enterprise cards before any authentication step.\\
+\textbf{Inputs:} User click on Candidate or Enterprise card\\
+\textbf{Outputs:} Navigation state passed to sign-in page; Enterprise path triggers secret-code modal\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} None
+
+\vspace{0.4cm}
+
+\subsection{Enterprise Secret Code Verification}
+\textbf{Requirement ID:} FR-AUTH-002\\
+\textbf{Description:} The system shall display a modal with a password input (max 6 characters)
+when the Enterprise card is selected. On submission it shall query Firestore
+\texttt{admin\_codes/admin1} and compare the entered value. If matched, it shall set
+\texttt{sessionStorage.admin\_preauth = "true"} and redirect to sign-in.\\
+\textbf{Inputs:} Secret code string (max 6 chars)\\
+\textbf{Outputs:} On success -- \texttt{sessionStorage} flag + navigation; on failure -- error toast\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} Firestore \texttt{admin\_codes} collection initialised
+
+\vspace{0.4cm}
+
+\subsection{User Sign-In and Sign-Up}
+\textbf{Requirement ID:} FR-AUTH-003\\
+\textbf{Description:} The system shall render a Clerk-provided dark-themed sign-in page
+at \texttt{/signin} and sign-up page at \texttt{/signup}, applying the teal brand colour
+via \texttt{@clerk/themes}.\\
+\textbf{Inputs:} Email, password (or Google OAuth)\\
+\textbf{Outputs:} Clerk JWT session token; redirect to role-appropriate dashboard\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} Clerk publishable key configured
+
+\vspace{0.4cm}
+
+\subsection{Route Protection -- ProtectRoutes}
+\textbf{Requirement ID:} FR-AUTH-004\\
+\textbf{Description:} The system shall wrap all authenticated routes in a
+\texttt{ProtectRoutes} component that redirects unauthenticated users to \texttt{/signin}.\\
+\textbf{Inputs:} Clerk session state\\
+\textbf{Outputs:} Allow or redirect\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} FR-AUTH-003
+
+\vspace{0.4cm}
+
+\subsection{Admin Route Guard}
+\textbf{Requirement ID:} FR-AUTH-005\\
+\textbf{Description:} The system shall protect \texttt{/enterprise} and \texttt{/setup}
+routes with an \texttt{AdminRoute} component that additionally verifies
+\texttt{user.publicMetadata.role === 'admin'} or the presence of the
+\texttt{admin\_preauth} session flag. Unauthorised users shall be redirected to
+\texttt{/select-role} with a toast notification.\\
+\textbf{Inputs:} Clerk user metadata, \texttt{sessionStorage}\\
+\textbf{Outputs:} Allow or redirect with toast\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} FR-AUTH-002, FR-AUTH-003
+
+\vspace{0.4cm}
+
+%------------------------------------------------
+\section{Mock Interview Module}
+
+\subsection{Interview Configuration}
+\textbf{Requirement ID:} FR-INT-001\\
+\textbf{Description:} The system shall allow a signed-in candidate to configure a mock
+interview by specifying job position, years of experience, and tech stack before starting.\\
+\textbf{Inputs:} \texttt{jobPosition} (string), \texttt{jobExperience} (integer),
+\texttt{techStack} (comma-separated string)\\
+\textbf{Outputs:} Interview configuration record; navigation to question screen\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} FR-AUTH-004
+
+\vspace{0.4cm}
+
+\subsection{AI Question Generation}
+\textbf{Requirement ID:} FR-INT-002\\
+\textbf{Description:} The system shall submit a structured JSON prompt to Gemini~1.5-Flash
+and parse the response into an array of \texttt{\{question, answer\}} objects for display.\\
+\textbf{Inputs:} Interview configuration\\
+\textbf{Outputs:} Array of 5 interview question--answer pairs; new Firestore
+\texttt{interviews} document\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} FR-INT-001; Gemini API key configured
+
+\vspace{0.4cm}
+
+\subsection{Answer Submission and AI Scoring}
+\textbf{Requirement ID:} FR-INT-003\\
+\textbf{Description:} The system shall allow the candidate to submit each answer and send
+it with question context to Gemini. The AI shall return a \texttt{rating}~(1--10),
+\texttt{feedback} string, and \texttt{correctAnswer}.\\
+\textbf{Inputs:} Candidate answer text, question context\\
+\textbf{Outputs:} Structured feedback card per question; \texttt{userAnswers} Firestore document\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} FR-INT-002
+
+\vspace{0.4cm}
+
+\subsection{Analytics Dashboard}
+\textbf{Requirement ID:} FR-INT-004\\
+\textbf{Description:} The system shall compute and display streak, average rating, best
+score, total sessions, skill distribution radar, and score history chart from
+the candidate's \texttt{userAnswers} Firestore records.\\
+\textbf{Inputs:} Firestore \texttt{userAnswers} collection (filtered by \texttt{userId})\\
+\textbf{Outputs:} Dashboard with Recharts visualisations\\
+\textbf{Priority:} Medium\\
+\textbf{Dependencies:} FR-INT-003
+
+\vspace{0.4cm}
+
+\subsection{Badge Awarding}
+\textbf{Requirement ID:} FR-INT-005\\
+\textbf{Description:} The system shall automatically award achievement badges to the
+candidate based on trigger conditions: First Interview Completed, 5-Day Streak, Perfect
+Score ($\geq$9.5), Collab Master (3+ sessions), Resume Pro (PDF exported).\\
+\textbf{Inputs:} Session and analytics data\\
+\textbf{Outputs:} New \texttt{badges} Firestore document; badge displayed on dashboard\\
+\textbf{Priority:} Low\\
+\textbf{Dependencies:} FR-INT-004
+
+\vspace{0.4cm}
+
+\subsection{Study Plan Generation}
+\textbf{Requirement ID:} FR-INT-006\\
+\textbf{Description:} The system shall submit gap topics identified from analytics to
+Gemini and display a week-by-week study plan roadmap.\\
+\textbf{Inputs:} List of weak topic areas, target role\\
+\textbf{Outputs:} Study plan stored in \texttt{studyPlans} Firestore collection and rendered in UI\\
+\textbf{Priority:} Medium\\
+\textbf{Dependencies:} FR-INT-004; Gemini API key configured
+
+\vspace{0.4cm}
+
+%------------------------------------------------
+\section{Collaboration Module}
+
+\subsection{Session Creation and Joining}
+\textbf{Requirement ID:} FR-COLLAB-001\\
+\textbf{Description:} The system shall allow a candidate to start a new collaborative
+coding session or join an existing session via a shared URL. Session metadata shall be
+persisted in the \texttt{groupSessions} Firestore collection.\\
+\textbf{Inputs:} User action (Create / Join), optional session ID\\
+\textbf{Outputs:} \texttt{groupSessions} document; navigation to editor page\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} FR-AUTH-004
+
+\vspace{0.4cm}
+
+\subsection{Collaborative Code Editor}
+\textbf{Requirement ID:} FR-COLLAB-002\\
+\textbf{Description:} The system shall render a Monaco Editor instance in the collaboration
+session page, supporting at minimum JavaScript and TypeScript with syntax highlighting and
+language selection.\\
+\textbf{Inputs:} Code typed by user, language selection\\
+\textbf{Outputs:} Editor state; syntax-highlighted code\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} FR-COLLAB-001
+
+\vspace{0.4cm}
+
+\subsection{Browser-Safe Code Execution}
+\textbf{Requirement ID:} FR-COLLAB-003\\
+\textbf{Description:} The system shall execute JavaScript/TypeScript code in the browser
+by overriding \texttt{console.log} to capture output, wrapping execution in try/catch,
+and displaying results in a terminal panel below the editor. Non-JS languages shall
+display an ``unsupported'' message.\\
+\textbf{Inputs:} Code string, selected language\\
+\textbf{Outputs:} Terminal output panel; error messages on exception\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} FR-COLLAB-002
+
+\vspace{0.4cm}
+
+\subsection{Camera and Microphone Toggle}
+\textbf{Requirement ID:} FR-COLLAB-004\\
+\textbf{Description:} The system shall allow users to toggle camera and microphone on/off
+using \texttt{navigator.mediaDevices.getUserMedia}. Camera tracks shall be attached to a
+\texttt{<video>} element; tracks shall be stopped on toggle-off.\\
+\textbf{Inputs:} Toggle button click\\
+\textbf{Outputs:} Live video/audio stream; stream cleanup on toggle-off\\
+\textbf{Priority:} Medium\\
+\textbf{Dependencies:} FR-COLLAB-001
+
+\vspace{0.4cm}
+
+\subsection{Session Invite}
+\textbf{Requirement ID:} FR-COLLAB-005\\
+\textbf{Description:} The system shall copy the current session URL to the clipboard via
+\texttt{navigator.clipboard.writeText(window.location.href)} when the Invite button is clicked.\\
+\textbf{Inputs:} Invite button click\\
+\textbf{Outputs:} URL copied to clipboard; toast confirmation\\
+\textbf{Priority:} Low\\
+\textbf{Dependencies:} FR-COLLAB-001
+
+\vspace{0.4cm}
+
+%------------------------------------------------
+\section{Proctored Interview Module}
+
+\subsection{Tab-Switch Detection}
+\textbf{Requirement ID:} FR-PROC-001\\
+\textbf{Description:} The system shall listen to \texttt{document.visibilitychange} events
+during a proctored session, increment a violation counter on each tab switch, and display
+a warning overlay when the violation threshold is exceeded.\\
+\textbf{Inputs:} Browser tab-switch event\\
+\textbf{Outputs:} Violation counter increment; warning overlay\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} FR-INT-001
+
+\vspace{0.4cm}
+
+\subsection{Eye-Tracking Overlay}
+\textbf{Requirement ID:} FR-PROC-002\\
+\textbf{Description:} The system shall activate a heuristic gaze-detection overlay using
+the camera feed. Looking away for more than 3 continuous seconds shall flag a gaze violation.\\
+\textbf{Inputs:} Camera video stream\\
+\textbf{Outputs:} Gaze violation flag; overlay indicator\\
+\textbf{Priority:} Medium\\
+\textbf{Dependencies:} FR-PROC-001; camera permission granted
+
+\vspace{0.4cm}
+
+\subsection{Integrity Report}
+\textbf{Requirement ID:} FR-PROC-003\\
+\textbf{Description:} At session end, the system shall compile and display an integrity
+report card containing violations count, time-per-question, and gaze violation scores.\\
+\textbf{Inputs:} Session violation data\\
+\textbf{Outputs:} Integrity report card rendered in UI\\
+\textbf{Priority:} Medium\\
+\textbf{Dependencies:} FR-PROC-001, FR-PROC-002
+
+\vspace{0.4cm}
+
+%------------------------------------------------
+\section{Resume Builder \& Analyser Module}
+
+\subsection{Resume Profile Editor}
+\textbf{Requirement ID:} FR-RES-001\\
+\textbf{Description:} The system shall allow a candidate to fill in personal details,
+professional summary, experience entries (add/remove), and skills in a form that renders
+a live preview in a two-column layout.\\
+\textbf{Inputs:} Name, email, phone, summary, experience array, skills array\\
+\textbf{Outputs:} Live preview updated on every keystroke; \texttt{resumeProfiles}
+Firestore document on save\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} FR-AUTH-004
+
+\vspace{0.4cm}
+
+\subsection{AI Resume Gap Analysis}
+\textbf{Requirement ID:} FR-RES-002\\
+\textbf{Description:} The system shall send the resume text and an uploaded job description
+to Gemini and return a list of missing skills or experience gaps.\\
+\textbf{Inputs:} Resume text, job description text\\
+\textbf{Outputs:} Gap analysis list rendered in UI\\
+\textbf{Priority:} Medium\\
+\textbf{Dependencies:} FR-RES-001; Gemini API key configured
+
+\vspace{0.4cm}
+
+\subsection{PDF Export}
+\textbf{Requirement ID:} FR-RES-003\\
+\textbf{Description:} The system shall export the rendered resume preview to a PDF file
+using html2canvas (canvas render) and jsPDF (PDF generation) and trigger a browser download.\\
+\textbf{Inputs:} Export button click\\
+\textbf{Outputs:} Downloaded PDF file on local device\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} FR-RES-001
+
+\vspace{0.4cm}
+
+%------------------------------------------------
+\section{Enterprise Admin Module}
+
+\subsection{Organisation Analytics Dashboard}
+\textbf{Requirement ID:} FR-ENT-001\\
+\textbf{Description:} The system shall display organisation-wide analytics for verified
+enterprise admins, including candidate score distributions, average ratings per role,
+and total active candidates.\\
+\textbf{Inputs:} Firestore \texttt{userAnswers}, \texttt{interviews} collections\\
+\textbf{Outputs:} Analytics charts and summary cards on the Enterprise dashboard\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} FR-AUTH-005
+
+\vspace{0.4cm}
+
+\subsection{Candidate Pipeline Management}
+\textbf{Requirement ID:} FR-ENT-002\\
+\textbf{Description:} The system shall allow enterprise admins to browse the candidate
+pipeline, filter by score range or job role, and view individual candidate performance
+summaries.\\
+\textbf{Inputs:} Filter parameters (score range, role)\\
+\textbf{Outputs:} Filtered candidate list with performance details\\
+\textbf{Priority:} Medium\\
+\textbf{Dependencies:} FR-ENT-001
+
+\vspace{0.4cm}
+
+\subsection{Admin Code Initialisation}
+\textbf{Requirement ID:} FR-ENT-003\\
+\textbf{Description:} The system shall provide an \texttt{initializeAdminCode()} utility
+that creates the \texttt{admin\_codes/admin1} Firestore document with a default code on
+first run, skipping creation if the document already exists.\\
+\textbf{Inputs:} Default code string\\
+\textbf{Outputs:} \texttt{admin\_codes} Firestore document (idempotent)\\
+\textbf{Priority:} High\\
+\textbf{Dependencies:} Firebase Firestore configured
+
+\vspace{0.4cm}
+
+%------------------------------------------------
+\chapter{Non-Functional Requirements}
+
+\section{Performance}
+
+\subsection{Page Load Time}
+\textbf{Requirement ID:} NFR-PERF-001\\
+\textbf{Description:} The system shall load the initial page within 2 seconds on a 4G
+connection. Vite code-splitting shall ensure the initial JavaScript bundle is under
+200~KB gzipped.\\
+\textbf{Priority:} High
+
+\vspace{0.3cm}
+
+\subsection{AI Response Latency}
+\textbf{Requirement ID:} NFR-PERF-002\\
+\textbf{Description:} The system shall complete 90\% of Gemini API calls within 3 seconds
+under normal (non-rate-limited) conditions.\\
+\textbf{Priority:} High
+
+\vspace{0.3cm}
+
+\subsection{Firestore Read/Write Latency}
+\textbf{Requirement ID:} NFR-PERF-003\\
+\textbf{Description:} Firestore read operations shall complete within 300~ms and write
+operations within 400~ms for 100 concurrent users.\\
+\textbf{Priority:} Medium
+
+\vspace{0.3cm}
+
+\subsection{PDF Export Time}
+\textbf{Requirement ID:} NFR-PERF-004\\
+\textbf{Description:} The resume PDF export (html2canvas render + jsPDF generation) shall
+complete within 5 seconds for a standard single-page resume.\\
+\textbf{Priority:} Medium
+
+%------------------------------------------------
+\section{Security}
+
+\subsection{JWT Session Tokens}
+\textbf{Requirement ID:} NFR-SEC-001\\
+\textbf{Description:} All authenticated routes shall be protected via Clerk-issued JWT
+session tokens. The frontend shall never expose raw tokens to \texttt{localStorage}.\\
+\textbf{Priority:} High
+
+\vspace{0.3cm}
+
+\subsection{Admin Portal Access Control}
+\textbf{Requirement ID:} NFR-SEC-002\\
+\textbf{Description:} The Enterprise admin portal shall require Firestore-verified secret
+code pre-authorisation in addition to Clerk authentication. The \texttt{AdminRoute}
+component shall enforce this at the routing layer.\\
+\textbf{Priority:} High
+
+\vspace{0.3cm}
+
+\subsection{Firestore Security Rules}
+\textbf{Requirement ID:} NFR-SEC-003\\
+\textbf{Description:} Firebase Firestore security rules shall restrict read/write access
+to documents scoped to the authenticated user's \texttt{userId}, preventing cross-user
+data access.\\
+\textbf{Priority:} High
+
+\vspace{0.3cm}
+
+\subsection{Session-Scoped Admin Flag}
+\textbf{Requirement ID:} NFR-SEC-004\\
+\textbf{Description:} The admin pre-auth flag stored in \texttt{sessionStorage} shall be
+cleared automatically on browser tab/session close, preventing persistent unauthorised
+access.\\
+\textbf{Priority:} Medium
+
+%------------------------------------------------
+\section{Reliability}
+
+\subsection{Error Handling}
+\textbf{Requirement ID:} NFR-REL-001\\
+\textbf{Description:} The system shall provide meaningful error messages (via toast
+notifications) for all failure cases -- including invalid admin code, Gemini API errors,
+Firestore write failures, and camera access denial -- and shall not crash the application.\\
+\textbf{Priority:} High
+
+\vspace{0.3cm}
+
+\subsection{Code Execution Error Isolation}
+\textbf{Requirement ID:} NFR-REL-002\\
+\textbf{Description:} Runtime errors in the collaborative code editor's code execution
+engine shall be caught in a try/catch block and displayed in the terminal panel without
+affecting the rest of the application.\\
+\textbf{Priority:} High
+
+%------------------------------------------------
+\section{Usability}
+
+\subsection{UI Consistency}
+\textbf{Requirement ID:} NFR-USAB-001\\
+\textbf{Description:} The user interface shall maintain a consistent dark-theme design
+system (obsidian-black background, teal-mint gradient accents) across all pages, using
+shadcn/ui components and TailwindCSS utility classes.\\
+\textbf{Priority:} Medium
+
+\vspace{0.3cm}
+
+\subsection{Responsive Design}
+\textbf{Requirement ID:} NFR-USAB-002\\
+\textbf{Description:} The application layout shall be fully responsive and usable on
+mobile (320px+), tablet (768px+), and desktop (1280px+) screen widths.\\
+\textbf{Priority:} Medium
+
+%------------------------------------------------
+\section{Scalability}
+
+\subsection{Horizontal Scaling}
+\textbf{Requirement ID:} NFR-SCAL-001\\
+\textbf{Description:} As a stateless React SPA hosted on Vercel's global CDN, the frontend
+shall support horizontal scaling without code changes. Firestore and Clerk shall independently
+scale to handle increased user load.\\
+\textbf{Priority:} Medium
+
+%------------------------------------------------
+\section{Compliance}
+
+\subsection{Data Privacy}
+\textbf{Requirement ID:} NFR-COMP-001\\
+\textbf{Description:} The system shall comply with Google Firebase and Clerk data
+privacy policies. User data stored in Firestore shall be scoped to their account and
+not shared with other users.\\
+\textbf{Priority:} High
+
+%------------------------------------------------
+\chapter{Data Requirements}
+
+\section{Database Design}
+Intervue uses \textbf{Firebase Firestore} (NoSQL document database) with 8 top-level
+collections. Each document uses Firestore auto-generated IDs unless stated otherwise.
+All collections enforce \texttt{userId}-scoped security rules.
+
+\section{Data Dictionary}
+
+\begin{longtable}{|p{3.2cm}|p{2cm}|p{2cm}|p{4cm}|}
+\hline
+\textbf{Collection / Field} & \textbf{Type} & \textbf{Constraints} & \textbf{Description} \\
+\hline
+\endhead
+
+\multicolumn{4}{|l|}{\textbf{interviews}} \\
+\hline
+id & string & auto, PK & Firestore auto-generated document ID \\
+\hline
+userId & string & required & Clerk user ID of the candidate \\
+\hline
+jobPosition & string & required & Target job role selected by candidate \\
+\hline
+jobExperience & integer & required, $\geq$0 & Years of experience entered \\
+\hline
+techStack & string & required & Comma-separated tech stack \\
+\hline
+createdAt & timestamp & auto & Record creation time \\
+\hline
+updatedAt & timestamp & auto & Last update time \\
+\hline
+
+\multicolumn{4}{|l|}{\textbf{userAnswers}} \\
+\hline
+id & string & auto, PK & Firestore auto-generated document ID \\
+\hline
+mockIdRef & string & required, FK & Reference to parent \texttt{interviews} document \\
+\hline
+userId & string & required & Clerk user ID \\
+\hline
+question & string & required & Interview question text \\
+\hline
+correctAnswer & string & required & AI-generated ideal answer \\
+\hline
+userAnswer & string & required & Candidate's submitted answer \\
+\hline
+rating & integer & 1--10 & Gemini AI score \\
+\hline
+feedback & string & & Gemini AI feedback text \\
+\hline
+createdAt & timestamp & auto & Record creation time \\
+\hline
+
+\multicolumn{4}{|l|}{\textbf{studyPlans}} \\
+\hline
+id & string & auto, PK & Firestore auto-generated document ID \\
+\hline
+userId & string & required & Clerk user ID \\
+\hline
+plan & array & required & Array of weekly study plan objects \\
+\hline
+targetRole & string & required & Target job role for the plan \\
+\hline
+generatedAt & timestamp & auto & Generation timestamp \\
+\hline
+
+\multicolumn{4}{|l|}{\textbf{admin\_codes}} \\
+\hline
+id & string & ``admin1'' & Fixed document ID \\
+\hline
+code & string & required & Plaintext enterprise secret code \\
+\hline
+updatedAt & timestamp & & Last update time \\
+\hline
+
+\multicolumn{4}{|l|}{\textbf{groupSessions}} \\
+\hline
+id & string & auto, PK & Firestore auto-generated document ID \\
+\hline
+createdBy & string & required & Clerk user ID of session creator \\
+\hline
+participants & array & & Array of participant user IDs \\
+\hline
+code & string & & Current editor code content \\
+\hline
+language & string & & Selected editor language \\
+\hline
+createdAt & timestamp & auto & Session creation time \\
+\hline
+
+\multicolumn{4}{|l|}{\textbf{resumeProfiles}} \\
+\hline
+id & string & auto, PK & Firestore auto-generated document ID \\
+\hline
+userId & string & required & Clerk user ID \\
+\hline
+name & string & required & Candidate full name \\
+\hline
+email & string & required & Contact email \\
+\hline
+phone & string & & Contact phone number \\
+\hline
+summary & string & & Professional summary \\
+\hline
+experience & array & & Array of experience entry objects \\
+\hline
+skills & array & & Array of skill tag strings \\
+\hline
+updatedAt & timestamp & auto & Last save timestamp \\
+\hline
+
+\multicolumn{4}{|l|}{\textbf{scheduledInterviews}} \\
+\hline
+id & string & auto, PK & Firestore auto-generated document ID \\
+\hline
+userId & string & required & Clerk user ID \\
+\hline
+interviewId & string & required, FK & Reference to \texttt{interviews} document \\
+\hline
+scheduledAt & timestamp & required & Scheduled interview date/time \\
+\hline
+title & string & & Custom interview title \\
+\hline
+notes & string & & Admin or candidate notes \\
+\hline
+status & string & & Status: \texttt{pending}, \texttt{completed}, \texttt{cancelled} \\
+\hline
+
+\multicolumn{4}{|l|}{\textbf{badges}} \\
+\hline
+id & string & auto, PK & Firestore auto-generated document ID \\
+\hline
+userId & string & required & Clerk user ID \\
+\hline
+badgeType & string & required & e.g., \texttt{first\_interview}, \texttt{streak\_5} \\
+\hline
+earnedAt & timestamp & auto & Badge award timestamp \\
+\hline
+
+\end{longtable}
+
+%------------------------------------------------
+\chapter{System Models}
+
+\section{Use Case Diagram}
+The primary actors are \textbf{Candidate}, \textbf{Enterprise Admin}, and
+\textbf{Gemini AI (external)}. Key use cases include:
+\begin{itemize}
+  \item Candidate: Register / Sign In, Configure Mock Interview, Answer Questions,
+        View Feedback \& Analytics, Use AI Coach, Start/Join Collaboration Session,
+        Build Resume, Export PDF, Take Proctored Interview, Generate Study Plan
+  \item Enterprise Admin: Verify Secret Code, Sign In via Clerk, View Organisation
+        Analytics, Browse Candidate Pipeline, Manage Setup
+  \item System: Verify Admin Code (Firestore), Generate Questions (Gemini),
+        Score Answers (Gemini), Award Badges
+\end{itemize}
+
+\section{Sequence Diagrams}
+Key sequences include:
+\begin{enumerate}
+  \item \textbf{Mock Interview Flow:} Candidate $\to$ Config Form $\to$ Gemini
+        (question gen) $\to$ Firestore (save interview) $\to$ Answer Screen $\to$
+        Gemini (scoring) $\to$ Firestore (save answers) $\to$ Feedback Page
+  \item \textbf{Enterprise Login Flow:} User $\to$ Select-Role Page $\to$ Secret Code
+        Modal $\to$ Firestore (verify) $\to$ sessionStorage flag $\to$ Clerk Sign-In
+        $\to$ AdminRoute $\to$ Enterprise Dashboard
+  \item \textbf{Collaboration Code Execution:} User $\to$ Monaco Editor $\to$ Run Code
+        $\to$ console.log override $\to$ eval() $\to$ Terminal Output Panel
+\end{enumerate}
+
+\section{Activity Diagram}
+The overall application activity flow:
+\begin{enumerate}
+  \item User visits landing page $\to$ clicks Get Started
+  \item Role Selection: Candidate or Enterprise
+  \item Enterprise path verifies secret code before sign-in
+  \item After Clerk authentication, role-specific dashboard is displayed
+  \item Candidate accesses: Interviews, Collab, Resume, AI Coach, Study Plan, Analytics
+  \item Enterprise Admin accesses: Dashboard, Pipeline, Setup
+  \item All data reads/writes pass through Firebase Firestore security rules
+\end{enumerate}
+
+\section{Class Diagram}
+Key React component relationships:
+\begin{itemize}
+  \item \texttt{App} contains \texttt{Router} with \texttt{ProtectRoutes} and
+        \texttt{AdminRoute} wrappers
+  \item \texttt{SelectRolePage} renders \texttt{SecretCodeModal} for Enterprise path
+  \item \texttt{InterviewPage} composes \texttt{QuestionPanel}, \texttt{AnswerRecorder},
+        \texttt{AICoachSidebar}
+  \item \texttt{CollabPage} composes \texttt{MonacoEditor}, \texttt{TerminalPanel},
+        \texttt{VideoPanel}
+  \item \texttt{ResumeBuilderPage} composes \texttt{ResumeForm}, \texttt{ResumePreview}
+  \item \texttt{EnterpriseDashboard} composes \texttt{AnalyticsCharts},
+        \texttt{CandidatePipelineTable}
+\end{itemize}
+
+%------------------------------------------------
+\chapter{Appendix}
+
+\section{Glossary}
+\begin{description}
+  \item[Candidate] An end user who uses Intervue to practise mock interviews and build
+        career readiness skills.
+  \item[Enterprise Admin] An authorised organisation representative who accesses
+        org-level analytics and the candidate pipeline via secret-code-gated login.
+  \item[Clerk] A third-party authentication-as-a-service provider used for user
+        sign-up, sign-in, JWT session management, and role metadata.
+  \item[Firestore] Google Cloud Firebase's NoSQL document database used for all
+        application data persistence.
+  \item[Gemini] Google DeepMind's generative AI model (gemini-1.5-flash) used for
+        interview question generation, answer scoring, AI coaching, study plan generation,
+        and resume gap analysis.
+  \item[Monaco Editor] The VS Code editor component embedded in the browser for the
+        Collaboration module's shared coding environment.
+  \item[AdminRoute] A React route-guard component that restricts access to enterprise
+        routes by verifying Clerk role metadata or the session-scoped admin pre-auth flag.
+  \item[ProtectRoutes] A React route-guard component that redirects unauthenticated
+        users to the sign-in page.
+  \item[SPA] Single-Page Application -- the application architecture used by Intervue,
+        where navigation occurs client-side without full page reloads.
+  \item[Vite] A modern frontend build tool used to bundle and serve the React application.
+  \item[Vercel] A cloud hosting platform on which the Intervue SPA is deployed with
+        automatic CI/CD on each \texttt{git push} to the \texttt{main} branch.
+\end{description}
+
+\section{To Be Determined (TBD)}
+\begin{itemize}
+  \item Admin secret code hashing (bcrypt or Argon2) before Firestore storage
+  \item Server-side code execution engine (WebAssembly sandbox or Judge0 API integration)
+        to support additional programming languages in the Collaboration module
+  \item Real-time collaborative cursor synchronisation in the Monaco Editor
+        (requires WebSocket server or Firebase Realtime Database)
+  \item Push notifications for scheduled interview reminders
+  \item Mobile native application (React Native) for iOS and Android
+  \item GDPR-compliant data deletion / right-to-erasure workflow
+\end{itemize}
+
+\end{document}

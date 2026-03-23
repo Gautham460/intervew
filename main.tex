@@ -1,0 +1,818 @@
+\documentclass{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+\usepackage{blowup}
+\blowUp{target=letter, landscape}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{pgfgantt}
+
+\title[Intervue -- Second Review]{Intervue -- Second Review}
+
+\author[Gautham Krishna, Hussain, Safwan]{
+    \textbf{Team Members:}\\
+    Gautham Krishna \\
+    Hussain \\
+    Safwan \\
+}
+\date{February 2026}
+
+\begin{document}
+
+% ============================================================
+% SLIDE 1: Title Slide
+% ============================================================
+\begin{frame}
+    \titlepage
+    \begin{center}
+    \small
+    \textbf{Project Guide:} Dr. [Guide Name]\\
+    \textbf{Domain:} AI Mock Interview
+    \end{center}
+\end{frame}
+
+% Contents
+\begin{frame}{Contents}
+    \tableofcontents
+\end{frame}
+
+% ============================================================
+% SLIDE 2: Introduction
+% ============================================================
+\section{Introduction}
+\begin{frame}{Introduction}{Project Overview}
+\begin{itemize}
+    \item Welcome to \textbf{Intervue}, the intelligent mock interview platform that transforms how job candidates prepare for their biggest opportunities
+    \item Whether you're targeting FAANG companies, startups, or any competitive role, Intervue combines cutting-edge AI, real-time feedback, and data-driven insights
+    \item Features include: Company-specific questions, Video recording with AI analysis, Proctored exam mode, Adaptive difficulty system, Resume analysis with ATS scoring
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 3: Problem Statement
+% ============================================================
+\section{Problem Statement}
+\begin{frame}{Problem Statement}{The Core Challenge}
+Traditional interview preparation is fragmented and ineffective:
+\begin{itemize}
+    \item Candidates practice in isolation without real feedback
+    \item Don't know which skills to prioritize
+    \item 85\% of job candidates report feeling unprepared
+    \item Mock interview services cost \$100-500 per session
+    \item Traditional methods (books, online courses) don't provide real-time feedback
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 4: Project Objectives
+% ============================================================
+\section{Project Objectives}
+\begin{frame}{Project Objectives}{What We Built}
+\textbf{1. Candidate Empowerment}
+\begin{itemize}
+    \item Enable job candidates to practice realistic mock interviews anytime, anywhere
+    \item Reduce interview anxiety through repeated, safe practice
+    \item Build confidence through immediate, intelligent feedback
+    \item Democratize access to quality interview preparation tools
+\end{itemize}
+
+\textbf{2. Intelligent Learning}
+\begin{itemize}
+    \item Implement AI-driven coaching that adapts to individual learning styles
+    \item Use Google Gemini AI to provide context-aware, detailed feedback
+    \item Track performance metrics to identify strengths and weaknesses
+    \item Create personalized study plans based on user goals
+\end{itemize}
+
+\textbf{3. Comprehensive Preparation}
+\begin{itemize}
+    \item Cover company-specific interview questions (10+ major companies)
+    \item Support multiple interview types (behavioral, technical, situational)
+    \item Provide resume optimization with ATS-aware analysis
+    \item Enable skill-based practice across 19+ technical domains
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Project Objectives}{Real-World Simulation \& Data-Driven Insights}
+\textbf{4. Real-World Simulation}
+\begin{itemize}
+    \item Record and analyze video interviews to improve delivery
+    \item Implement proctored exam mode with violation detection
+    \item Enable group practice for collaborative learning
+    \item Simulate pressure and timing conditions of real interviews
+\end{itemize}
+
+\textbf{5. Data-Driven Insights}
+\begin{itemize}
+    \item Provide detailed performance analytics and metrics
+    \item Calculate learning curves and improvement trends
+    \item Identify weak areas requiring focused study
+    \item Generate actionable improvement recommendations
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 5: Purpose and Need
+% ============================================================
+\section{Purpose and Need}
+\begin{frame}{Purpose and Need}{Who Benefits \& Why It Matters}
+\textbf{The Interview Preparation Crisis}
+\begin{itemize}
+    \item \textbf{85\% of job candidates} report feeling unprepared for interviews
+    \item \textbf{Traditional methods fail}: Books and courses don't provide real-time feedback
+    \item \textbf{Practice partner scarcity}: Most candidates practice alone
+    \item \textbf{High stakes, low confidence}: First interviews determine career trajectory
+    \item \textbf{Expensive alternatives}: Mock interviews cost \$100-500 per session
+\end{itemize}
+
+\textbf{What Candidates Actually Need}
+\begin{enumerate}
+    \item \textbf{Realistic Practice} - Simulate actual interview conditions
+    \item \textbf{Intelligent Feedback} - Learn what they did wrong immediately
+    \item \textbf{Skill-Specific Guidance} - Master specific skills and companies
+    \item \textbf{Measurable Progress} - Track improvement over time
+    \item \textbf{Accessible \& Affordable} - Available 24/7 without expensive coaches
+    \item \textbf{Peer Support} - Learn alongside others
+    \item \textbf{Comprehensive Coverage} - Behavioral, technical, and situational
+\end{enumerate}
+\end{frame}
+
+% ============================================================
+% SLIDE 6: Scope of the Project
+% ============================================================
+\section{Scope of the Project}
+\begin{frame}{Scope of the Project}{System Modules}
+\textbf{Company Questions System}
+\begin{itemize}
+    \item Database of 10+ company-specific interview questions
+    \item Filter by company and role
+    \item Track question frequency and relevance
+\end{itemize}
+
+\textbf{Group Practice Sessions}
+\begin{itemize}
+    \item Create collaborative practice groups
+    \item Invite multiple candidates
+    \item Real-time session tracking
+\end{itemize}
+
+\textbf{Video Recording \& Analysis}
+\begin{itemize}
+    \item Browser-based video recording
+    \item ML-based performance metrics
+    \item Video storage and retrieval
+\end{itemize}
+
+\textbf{Proctored Exam Mode}
+\begin{itemize}
+    \item Real-time integrity monitoring
+    \item Violation detection (tab switching, copy-paste)
+    \item Face detection and environment monitoring
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Scope of the Project}{Additional Modules}
+\textbf{Adaptive Difficulty System}
+\begin{itemize}
+    \item Dynamic question selection based on performance
+    \item Three difficulty levels (easy, medium, hard)
+    \item Automatic promotion/demotion logic
+    \item Personalized learning curves
+\end{itemize}
+
+\textbf{AI Coach}
+\begin{itemize}
+    \item Google Gemini-powered feedback
+    \item Context-aware recommendations
+    \item Performance trend analysis
+\end{itemize}
+
+\textbf{Resume Analysis}
+\begin{itemize}
+    \item ATS compatibility scoring
+    \item Keyword extraction and optimization
+    \item Improvement suggestions
+\end{itemize}
+
+\textbf{Study Plans}
+\begin{itemize}
+    \item Personalized learning paths
+    \item Milestone tracking
+    \item Goal-based preparation
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 7: Social Relevance & SDGs
+% ============================================================
+\section{Social Relevance \& SDGs}
+\begin{frame}{Social Relevance \& UN SDGs}{Alignment \& Impact}
+\small
+\textbf{Social Relevance:}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item \textbf{Democratization}: Expert coaching for 50M+ job seekers
+    \item \textbf{Economic Mobility}: AI-powered feedback for all candidates
+    \item \textbf{Level Playing Field}: Remove privilege barriers
+    \item \textbf{Impact}: 40\% success increase, \$25K+/year salary boost
+\end{itemize}
+
+\vspace{2pt}
+
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{|c|l|p{5cm}|}
+\hline
+\textbf{SDG} & \textbf{Title} & \textbf{Contribution} \\ \hline
+4 & Quality Education & Skill development, interview training \\ \hline
+8 & Decent Work & Job readiness, career preparation \\ \hline
+10 & Reduced Inequalities & Equal access to interview prep \\ \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+% ============================================================
+% SLIDE 8: SRS Overview
+% ============================================================
+\section{Software Requirements Specification}
+\begin{frame}{SRS}{Hardware \& Software Requirements}
+\textbf{Hardware Requirements:}
+\begin{itemize}
+    \item Processor: Intel i3+ / Apple M1+
+    \item RAM: 4 GB minimum
+    \item Webcam \& Microphone for video recording
+    \item Internet: 1 Mbps minimum
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Software Requirements:}
+\begin{itemize}
+    \item OS: Windows 10+ / macOS / Linux / Android / iOS
+    \item Browser: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+    \item Firebase (Backend), Firestore (Database)
+    \item Git, npm (Development)
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 8.1: Functional Requirements
+% ============================================================
+\begin{frame}{SRS}{Functional Requirements}
+\begin{itemize}
+    \item \textbf{FR-01:} Self-registration with email and password
+    \item \textbf{FR-02:} Firebase authentication with role detection (candidate/admin)
+    \item \textbf{FR-03:} Browse interview types by skill, select difficulty level
+    \item \textbf{FR-04:} Prevent concurrent interviews -- active session blocks new start
+    \item \textbf{FR-05:} Premium subscription activation for advanced features
+    \item \textbf{FR-06:} WebRTC video recording with camera/mic toggle
+    \item \textbf{FR-07:} AI Coach generates feedback from recorded answers
+    \item \textbf{FR-08:} User views dashboard, completes scheduled interviews
+    \item \textbf{FR-09:} Admin add/edit/delete users, manage content
+    \item \textbf{FR-10:} Log all user actions with timestamp and details
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 8.2: Non-Functional Requirements
+% ============================================================
+\begin{frame}{SRS}{Non-Functional Requirements}
+\textbf{Performance}
+\begin{itemize}
+    \item Page load time under 3 seconds on 4G connection
+    \item AI feedback generation under 2 seconds for 95\% of requests
+    \item Video upload processing under 5 seconds per MB
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Security}
+\begin{itemize}
+    \item All communication over HTTPS (TLS 1.3)
+    \item Passwords hashed with bcrypt (10+ salt rounds)
+    \item Interview recordings encrypted at rest
+    \item Rate limiting: 100 requests / 15 minutes per IP
+    \item Firebase Firestore row-level security rules
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Scalability \& Usability}
+\begin{itemize}
+    \item Stateless backend (Firebase) enables horizontal scaling
+    \item Support 1000+ concurrent users
+    \item Responsive design for mobile, tablet, desktop
+    \item WCAG 2.1 Level AA accessibility compliance
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 9: System Architecture
+% ============================================================
+\section{System Architecture}
+\begin{frame}{System Architecture}{Block Diagram}
+\textbf{Architecture Overview:}
+\begin{itemize}
+    \item \textbf{Frontend}: React 18 + TypeScript, Vite, TailwindCSS
+    \item \textbf{Backend}: Firebase (Auth, Firestore, Storage, Cloud Functions)
+    \item \textbf{AI}: Google Gemini Pro for coaching and feedback
+    \item \textbf{Video}: WebRTC for recording and streaming
+    \item \textbf{Hosting}: Vercel (Frontend), Firebase (Backend)
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Data Flow:}
+\begin{enumerate}
+    \item User $\rightarrow$ React Frontend (Vercel)
+    \item Authentication $\rightarrow$ Firebase Auth
+    \item Data Storage $\rightarrow$ Firestore NoSQL
+    \item Video Files $\rightarrow$ Cloud Storage
+    \item AI Analysis $\rightarrow$ Google Gemini API
+    \item Feedback $\rightarrow$ User Dashboard
+\end{enumerate}
+\end{frame}
+
+% ============================================================
+% SLIDE 10: GUI Design
+% ============================================================
+\section{GUI Design}
+\begin{frame}{GUI Design}{Design Principles}
+\textbf{Design Principles:}
+\begin{itemize}
+    \item Dark theme primary (Obsidian black) with light mode toggle
+    \item Teal accent color, mobile-first responsive design
+    \item shadcn/ui component library, TailwindCSS, Lucide icons
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Key Screens:}
+\begin{enumerate}
+    \item Landing Page -- Feature highlights and CTAs
+    \item Login / Register -- Role-based authentication
+    \item Dashboard -- Stats cards, performance metrics
+    \item Interview Practice -- Question display, video recording
+    \item AI Coach -- Feedback and recommendations
+    \item Resume Analysis -- ATS scoring and suggestions
+    \item Admin Panel -- User management, content management
+\end{itemize}
+\end{frame}
+
+% GUI Screenshots
+\begin{frame}{GUI Design}{Landing Page}
+\centering
+\textit{(Landing Page screenshot would appear here)}
+\end{frame}
+
+\begin{frame}{GUI Design}{Authentication Screens}
+\begin{columns}
+\column{0.48\textwidth}
+\centering
+\textbf{Sign In}
+\column{0.48\textwidth}
+centering
+\textbf{Sign Up}
+\end{columns}
+\textit{(Sign In & Sign Up screenshots would appear here)}
+\end{frame}
+
+\begin{frame}{GUI Design}{Dashboard}
+\textit{(Dashboard screenshot would appear here)}
+\end{frame}
+
+\begin{frame}{GUI Design}{Interview Practice}
+\textit{(Interview Practice screenshot would appear here)}
+\end{frame}
+
+% ============================================================
+% SLIDE 11: Database Design
+% ============================================================
+\section{Database Design}
+\begin{frame}{Database Design}{Firestore Collections}
+\begin{block}{users}
+\begin{itemize}
+    \item id, email, password, name, role, skills, created\_at
+\end{itemize}
+\end{block}
+
+\begin{block}{interviews}
+\begin{itemize}
+    \item id, user\_id, question\_id, difficulty, score, video\_url, feedback, created\_at
+\end{itemize}
+\end{block}
+
+\begin{block}{study\_plans}
+\begin{itemize}
+    \item id, user\_id, goal, milestones, progress, updated\_at
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Database Design}{Additional Collections}
+\begin{block}{interview\_sessions}
+\begin{itemize}
+    \item id, user\_id, session\_type, start\_time, end\_time, status
+\end{itemize}
+\end{block}
+
+\begin{block}{video\_recordings}
+\begin{itemize}
+    \item id, interview\_id, video\_url, confidence\_score, eye\_contact\_score
+\end{itemize}
+\end{block}
+
+\begin{block}{resume\_analyses}
+\begin{itemize}
+    \item id, user\_id, ats\_score, keywords, suggestions, uploaded\_at
+\end{itemize}
+\end{block}
+
+\vspace{3pt}
+\textbf{Key Relationships:}
+\begin{itemize}
+    \item users $\rightarrow$ interviews (1:N)
+    \item users $\rightarrow$ study\_plans (1:N)
+    \item interviews $\rightarrow$ video\_recordings (1:1)
+    \item users $\rightarrow$ resume\_analyses (1:N)
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 12: Technology Stack
+% ============================================================
+\section{Technology Stack}
+\begin{frame}{Technology Stack}{Languages, Frameworks \& Tools}
+\textbf{Frontend:}
+\begin{itemize}
+    \item React 18 + TypeScript, Vite (build tool)
+    \item TailwindCSS + Radix UI components
+    \item React Router v6 for navigation
+    \item Deployed on \textbf{Vercel}
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Backend:}
+\begin{itemize}
+    \item Firebase suite (Firestore, Auth, Storage, Cloud Functions)
+    \item Google Generative AI (Gemini Pro) for coaching
+    \item WebRTC for video recording and streaming
+    \item Serverless auto-scaling architecture
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Database \& Video:}
+\begin{itemize}
+    \item Firestore (NoSQL) with row-level security
+    \item Cloud Storage for video and resume files
+    \item WebRTC P2P with DTLS-SRTP encryption
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 13-15: Use Case Diagrams
+% ============================================================
+\section{Use Case Diagrams / DFD}
+\begin{frame}{Use Case Diagram}{Overall System}
+\textbf{System Use Cases:}
+\begin{itemize}
+    \item \textbf{Candidate}: Registration, Interview Practice, Video Recording, AI Feedback
+    \item \textbf{Track Performance}: Dashboard, Analytics, Study Plans
+    \item \textbf{Admin}: User Management, Content Management, System Monitoring
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Use Case Diagram}{Candidate Flow}
+\textbf{Candidate Interview Flow:}
+\begin{enumerate}
+    \item Browse available interview types
+    \item Select difficulty level and time slot
+    \item Prevent concurrent interviews
+    \item Record interview session
+    \item Receive AI feedback
+    \item View performance analytics
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Use Case Diagram}{Proctored Exam Flow}
+\textbf{Proctored Exam Flow:}
+\begin{enumerate}
+    \item Start proctored session
+    \item Monitor environment (webcam, audio, tab switches)
+    \item Flag violations (copy-paste, tab switching)
+    \item Complete session with integrity score
+    \item Generate violation report
+\end{enumerate}
+\end{frame}
+
+% ============================================================
+% SLIDE 16: Data Flow Diagram
+% ============================================================
+\begin{frame}{Data Flow Diagram}{System Overview}
+\textbf{Key Data Flows:}
+\begin{itemize}
+    \item User Input $\rightarrow$ Video Recording $\rightarrow$ Analysis
+    \item Analysis $\rightarrow$ Google Gemini API $\rightarrow$ AI Feedback
+    \item All Data $\rightarrow$ Firebase Firestore (Encrypted)
+    \item Performance Data $\rightarrow$ Analytics Dashboard
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 18: Algorithm - Interview Flow
+% ============================================================
+\section{Algorithms / Procedures}
+\begin{frame}{Algorithm 1}{Interview Practice Flow}
+\textbf{Setup Phase:}
+\begin{enumerate}
+    \item Candidate selects interview type (Company Q, Adaptive, Group, etc.)
+    \item Select difficulty level: Easy, Medium, Hard
+    \item Request camera/microphone permissions
+    \item Initialize video recording infrastructure
+\end{enumerate}
+
+\vspace{3pt}
+\textbf{Interview Phase:}
+\begin{enumerate}
+    \item Display interview question(s)
+    \item Record candidate's answer (video + audio)
+    \item Send to Google Gemini for analysis
+    \item Generate AI feedback with 95th confidence
+    \item Log performance metrics to Firestore
+\end{enumerate}
+\end{frame}
+
+% ============================================================
+% SLIDE 19: Algorithm - Adaptive Difficulty
+% ============================================================
+\begin{frame}{Algorithm 2}{Adaptive Difficulty Adjustment}
+\begin{enumerate}
+    \item Evaluate candidate's answer using Gemini AI
+    \item Calculate performance score (0-100)
+    \item Check difficulty adjustment rules:
+    \begin{itemize}
+        \item \textbf{Promote}: Score $\geq$ 80\% AND 2+ successful $\rightarrow$ Increase difficulty
+        \item \textbf{Demote}: Score $<$ 50\% $\rightarrow$ Decrease difficulty
+        \item \textbf{Maintain}: Keep current difficulty otherwise
+    \end{itemize}
+    \item Update user performance profile
+    \item Calculate learning curve from historical data
+    \item Retrieve next question at appropriate difficulty
+\end{enumerate}
+\end{frame}
+
+% ============================================================
+% SLIDE 20: Algorithm - AI Feedback
+% ============================================================
+\begin{frame}{Algorithm 3}{AI Feedback Generation}
+\begin{enumerate}
+    \item Extract candidate's answer text and video metadata
+    \item Prepare prompt for Google Gemini with context:
+    \begin{itemize}
+        \item Interview question
+        \item Expected answer (if available)
+        \item Candidate's actual answer
+        \item User's skill level and history
+    \end{itemize}
+    \item Call Gemini API with structured format request
+    \item Parse response: score, strengths, improvements, hints
+    \item Store feedback in Firestore with timestamp
+    \item Calculate improvement trend
+    \item Return formatted feedback to UI (<2 second SLA)
+\end{enumerate}
+\end{frame}
+
+% ============================================================
+% SLIDE 21: Algorithm - Proctoring
+% ============================================================
+\begin{frame}{Algorithm 4}{Proctored Exam Monitoring}
+\textbf{Continuous Monitoring Loop:}
+\begin{enumerate}
+    \item Poll system events every 500ms during exam:
+    \begin{itemize}
+        \item Tab switch detection (blur/focus events)
+        \item Keystrokes (Ctrl+C, Ctrl+V detection)
+        \item Audio status (muted or unmuted)
+        \item Face presence via camera
+    \end{itemize}
+    \item \textbf{Violation Detection}: If suspicious activity detected
+    \begin{itemize}
+        \item Record violation type, timestamp, details
+        \item Increment violation counter
+        \item Display warning to candidate (first violation)
+        \item Terminate session if >3 violations
+    \end{itemize}
+    \item \textbf{Integrity Score}: Score = 100 - (violations $\times$ 10)
+    \item \textbf{Report Generation}: Provide violation summary
+\end{enumerate}
+\end{frame}
+
+% ============================================================
+% SLIDE 22: Algorithm - Resume Analysis
+% ============================================================
+\begin{frame}{Algorithm 5}{Resume Analysis Processing}
+\begin{enumerate}
+    \item User uploads resume (PDF/DOC/TXT)
+    \item Extract text content from file
+    \item Parse resume structure: contact, summary, skills, experience
+    \item Extract keywords using NLP (Google Gemini)
+    \item Categorize skills: Technical, Leadership, Tools, Languages
+    \item Generate ATS compatibility score:
+    \begin{itemize}
+        \item Check formatting (sections, length, clarity)
+        \item Check keyword density (target vs actual)
+        \item Check readability score
+    \end{itemize}
+    \item Compare against job description (if provided)
+    \item Generate improvement suggestions
+    \item Return formatted analysis with scores
+\end{enumerate}
+\end{frame}
+
+% ============================================================
+% SLIDE 23: Algorithm - Analytics
+% ============================================================
+\begin{frame}{Algorithm 6}{Analytics \& Performance Tracking}
+\textbf{Performance Metrics Calculation:}
+\begin{enumerate}
+    \item Collect all interview records for user
+    \item Calculate per-interview metrics:
+    \begin{itemize}
+        \item Answer quality score (from AI feedback)
+        \item Clarity score (from video analysis)
+        \item Confidence level (from tone/pace analysis)
+    \end{itemize}
+    \item Aggregate by skill (group questions by domain)
+    \item Calculate trend analysis (improvement over time)
+    \item Identify weak areas: scores $<$ 60\%
+    \item Generate recommendations: Focus on weak areas
+    \item Display analytics dashboard with visualizations
+\end{enumerate}
+\end{frame}
+
+% ============================================================
+% SLIDE 24: Project Status
+% ============================================================
+\section{Status of Work}
+\begin{frame}{Status of Work}{Project Completion Status}
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{|p{5cm}|c|}
+\hline
+\textbf{Component} & \textbf{Status} \\ \hline
+Frontend Architecture (React + TypeScript) & 100\% \\ \hline
+Firebase Authentication \& Security & 100\% \\ \hline
+Video Recording \& ML Analysis & 100\% \\ \hline
+AI Coaching (Google Gemini) & 100\% \\ \hline
+Proctored Exam Mode & 100\% \\ \hline
+Adaptive Difficulty Engine & 100\% \\ \hline
+Interview Scheduling & 100\% \\ \hline
+Resume Analysis \& ATS & 100\% \\ \hline
+Study Plans & 100\% \\ \hline
+Social Features & 100\% \\ \hline
+Firestore Database & 100\% \\ \hline
+Analytics Dashboard & 100\% \\ \hline
+UI/UX Design & 100\% \\ \hline
+Security Hardening & 100\% \\ \hline
+Testing \& Deployment & 100\% \\ \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+% ============================================================
+% SLIDE 25: Screenshots
+% ============================================================
+\section{Screenshots}
+\begin{frame}{Application Screenshots}{Key Interfaces}
+\textbf{Candidate Interface:}
+\begin{itemize}
+    \item Landing Page with feature highlights
+    \item Login / Register with dark and light mode
+    \item Dashboard with stat cards and performance metrics
+    \item Interview Practice with video recording
+    \item AI Coach with feedback and recommendations
+\end{itemize}
+
+\vspace{3pt}
+\textbf{Admin Interface:}
+\begin{itemize}
+    \item User Management panel
+    \item Content Management
+    \item Analytics Dashboard
+    \item System Monitoring
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 26: Project Budget
+% ============================================================
+\section{Project Budget}
+\begin{frame}{Project Budget}{Cost Breakdown}
+\begin{table}
+\centering
+\begin{tabular}{|l|l|r|}
+\hline
+\textbf{Item} & \textbf{Service} & \textbf{Cost (INR)} \\ \hline
+Frontend Hosting & Vercel (Free Tier) & 0 \\ \hline
+Backend & Firebase (Spark Plan) & 0 \\ \hline
+Database & Firestore (Free Tier) & 0 \\ \hline
+Storage & Cloud Storage (Free Tier) & 0 \\ \hline
+AI API & Google Gemini (Free Tier) & 0 \\ \hline
+Domain Name & Custom domain (optional) & 800/yr \\ \hline
+SSL Certificates & Auto-provisioned (Free) & 0 \\ \hline
+Development Tools & VS Code, Git, Node.js & 0 \\ \hline
+\hline
+\textbf{Total (MVP)} & & \textbf{0 -- 800} \\ \hline
+\end{tabular}
+\end{table}
+
+\vspace{3pt}
+\begin{center}
+\scriptsize
+\textit{Production scaling: Firebase Blaze (\$0.06/GB storage), Gemini Pro (\$0.001/1K tokens)}
+\end{center}
+\end{frame}
+
+% ============================================================
+% SLIDE 27: Project Scheduling
+% ============================================================
+\section{Project Scheduling}
+\begin{frame}{Project Scheduling}{Detailed Timeline}
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{|p{4cm}|p{3.5cm}|c|}
+\hline
+\textbf{Phase} & \textbf{Time Period} & \textbf{Weeks} \\ \hline
+Research \& Analysis & Week 1--2 & 2 \\ \hline
+SRS Document & Week 2--3 & 2 \\ \hline
+System Design & Week 3--4 & 2 \\ \hline
+\textit{Review 1} & \textit{Week 4} & \\ \hline
+Database Design & Week 5--6 & 2 \\ \hline
+Firebase Setup & Week 6--8 & 3 \\ \hline
+Frontend UI & Week 7--14 & 8 \\ \hline
+Video Integration & Week 10--14 & 5 \\ \hline
+AI Coach & Week 12--16 & 5 \\ \hline
+Proctored Mode & Week 14--18 & 5 \\ \hline
+\textit{Review 2} & \textit{Week 16} & \\ \hline
+Testing & Week 17--20 & 4 \\ \hline
+Deployment & Week 19--22 & 4 \\ \hline
+Documentation & Week 21--23 & 3 \\ \hline
+Final Presentation & Week 23--24 & 2 \\ \hline
+\textit{Final Review} & \textit{Week 24} & \\ \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+% ============================================================
+% SLIDE 28: Conclusion
+% ============================================================
+\section{Conclusion}
+\begin{frame}{Conclusion}
+\begin{itemize}
+    \item \textbf{Intervue successfully delivers} a fully functional AI-powered mock interview platform with 10 complete feature systems
+    \item \textbf{10 Complete Features}: Company Questions, Group Practice, Video Recording, Proctored Mode, Adaptive Questions, AI Coach, Interview Scheduling, Resume Analysis, Study Plans, Social Features
+    \item \textbf{Real-time AI Coaching} powered by Google Gemini provides intelligent feedback in $<$2 seconds
+    \item \textbf{Cloud-native architecture} (Firebase) enables 1000+ concurrent users without infrastructure management
+    \item \textbf{Security-first design} with encryption, row-level access control
+    \item \textbf{Platform deployed \& live} -- all features functional and accessible
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 29: Bibliography
+% ============================================================
+\section{Bibliography}
+\begin{frame}{Bibliography}
+\scriptsize
+\begin{enumerate}
+    \item React Documentation, Meta Platforms Inc., \textit{https://react.dev}, 2024
+    \item Firebase Documentation, Google, \textit{https://firebase.google.com/docs}, 2024
+    \item WebRTC 1.0 Specification, W3C, \textit{https://www.w3.org/TR/webrtc/}, 2024
+    \item Google Gemini API Documentation, Google, \textit{https://ai.google.dev/docs}, 2024
+    \item Firestore Documentation, Google, \textit{https://firebase.google.com/docs/firestore}, 2024
+    \item TailwindCSS Documentation, \textit{https://tailwindcss.com/docs}, 2024
+    \item Radix UI Documentation, \textit{https://radix-ui.com}, 2024
+    \item OWASP Security Cheat Sheet, \textit{https://cheatsheetseries.owasp.org}, 2024
+    \item Vercel Deployment Guide, \textit{https://vercel.com/docs}, 2024
+    \item ATS Guidelines, Jobscan, \textit{https://jobscan.co/ats-guide}, 2024
+\end{enumerate}
+\end{frame}
+
+% ============================================================
+% Thank You
+% ============================================================
+\begin{frame}
+\begin{center}
+\Huge \textbf{Thank You!}\\
+\vspace{1cm}
+\Large Questions?
+\end{center}
+\end{frame}
+
+\end{document}

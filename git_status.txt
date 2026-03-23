@@ -1,0 +1,98 @@
+ M index.html
+ M package.json
+ M src/App.tsx
+ M src/components/container.tsx
+ M src/components/footer.tsx
+ M src/components/form-mock-interview.tsx
+ M src/components/header.tsx
+ M src/components/navigation-routes.tsx
+ M src/components/toggle-container.tsx
+ M src/layouts/auth-layout.tsx
+ M src/lib/helpers.ts
+ M src/main.tsx
+ M src/routes/dashboard.tsx
+ M src/routes/home.tsx
+ M src/routes/mock-interview-page.tsx
+ M src/routes/sign-in.tsx
+ M src/routes/sign-up.tsx
+ M src/types/index.ts
+ M vite.config.ts
+?? ARCHITECTURE_DIAGRAM.md
+?? DATABASE_QUESTIONS_SETUP.md
+?? DATABASE_SYSTEM_SUMMARY.md
+?? ENHANCEMENT_SUMMARY.md
+?? FEATURE_UPGRADES_COMPLETE.md
+?? FINAL_CHECKLIST.md
+?? IMPLEMENTATION_CHECKLIST.md
+?? IMPLEMENTATION_COMPLETE.md
+?? NEW_FEATURES_GUIDE.md
+?? PROJECT_COMPLETION_REPORT.md
+?? QUICK_REFERENCE.md
+?? QUICK_REFERENCE_ADVANCED.md
+?? QUICK_START.md
+?? RESUME_FEATURE_GUIDE.md
+?? TASK_PLAN.md
+?? VISUAL_SUMMARY.md
+?? build_log.txt
+?? build_output.txt
+?? compile_errors.txt
+?? git_changes.txt
+?? "main (1).tex"
+?? main.tex
+?? package-lock.json
+?? public/pdf.worker.v5.mjs
+?? setupTests.ts
+?? src/App.test.tsx
+?? src/components/analytics-dashboard.tsx
+?? src/components/company-database-seeder.tsx
+?? src/components/company-question-practice.tsx
+?? src/components/database-seeder.tsx
+?? src/components/enhanced-dashboard.tsx
+?? src/components/gamification-banner.tsx
+?? src/components/performance-card.tsx
+?? src/components/record-skill-answer.tsx
+?? src/components/resume-upload.tsx
+?? src/components/ui/avatar.tsx
+?? src/components/ui/select.tsx
+?? src/i18n.ts
+?? src/layouts/admin-route.tsx
+?? src/lib/adaptive-questions.ts
+?? src/lib/admin-init.ts
+?? src/lib/ai-coach.ts
+?? src/lib/analytics.ts
+?? src/lib/company-questions.ts
+?? src/lib/group-practice.ts
+?? src/lib/interview-filters.ts
+?? src/lib/interview-scheduling.ts
+?? src/lib/proctored-mode.ts
+?? src/lib/resume-analysis.ts
+?? src/lib/resume-parser.ts
+?? src/lib/seed-company-questions.ts
+?? src/lib/seed-questions.ts
+?? src/lib/skill-questions-db.ts
+?? src/lib/skill-questions.ts
+?? src/lib/social-features.ts
+?? src/lib/study-plans.ts
+?? src/lib/video-recording.ts
+?? src/routes/abstract-shapes.png
+?? src/routes/ai-coach-page.tsx
+?? src/routes/analytics-page.tsx
+?? src/routes/collaboration-page.tsx
+?? src/routes/company-questions-page.tsx
+?? src/routes/enterprise-dashboard.tsx
+?? src/routes/group-practice-page.tsx
+?? src/routes/home.css
+?? src/routes/interview-scheduling-page.tsx
+?? src/routes/proctored-mode-page.tsx
+?? src/routes/resume-analysis-page.tsx
+?? src/routes/resume-builder-page.test.tsx
+?? src/routes/resume-builder-page.tsx
+?? src/routes/select-role.tsx
+?? src/routes/setup-page.tsx
+?? src/routes/social-features-page.tsx
+?? src/routes/study-plans-page.tsx
+?? src/routes/video-recording-page.tsx
+?? srs__second_revision.zip
+?? srs__second_revision/
+?? test_error.txt
+?? tmp_fetch_students.mjs

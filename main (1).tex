@@ -1,0 +1,1249 @@
+\documentclass{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+\usepackage{blowup}
+\blowUp{target=letter, landscape}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{pgfgantt}
+\usepackage{hyperref}
+\usepackage{amssymb}
+
+\title[Intervue -- Third Review]{Intervue -- Third Review}
+
+\author[Gautham Krishna, Hussain, Safwan]{
+    \textbf{Team Members:}\\
+    Gautham Krishna \\
+    Hussain \\
+    Safwan \\
+}
+
+\date{March 2026}
+
+\begin{document}
+
+% ============================================================
+% SLIDE 1: Title Slide
+% ============================================================
+\begin{frame}
+    \titlepage
+    \begin{center}
+    \small
+    \textbf{Project Guide:} Dr. Shimy Joseph\\
+    \textbf{Domain:} EdTech \& AI-Powered Career Preparation\\
+    \textbf{Project Title:} Intervue -- AI Mock Interview \& Career Readiness Platform
+    \end{center}
+\end{frame}
+
+% Contents
+\begin{frame}{Contents}
+    \scriptsize
+    \setlength{\parskip}{3pt}
+    \begin{columns}[t]
+    \column{0.48\textwidth}
+    \tableofcontents[sections={1-8}]
+    \column{0.48\textwidth}
+    \tableofcontents[sections={9-15}]
+    \end{columns}
+\end{frame}
+
+% ============================================================
+% SLIDE 2: Introduction
+% ============================================================
+\section{Introduction}
+\begin{frame}{Introduction}{Project Overview}
+\begin{itemize}
+    \item Intervue is a \textbf{full-stack AI-powered mock interview platform} enabling candidates to practice technical and behavioural interviews and receive real-time intelligent feedback
+
+    \item Designed as a \textbf{comprehensive career readiness suite} combining AI coaching, collaborative coding sessions, resume analysis, and enterprise hiring management
+
+    \item Built on a \textbf{React + Vite frontend} with Firebase as the backend for authentication and data persistence, and Gemini AI for all intelligence features
+
+    \item Supports \textbf{real-time collaborative coding} (Monaco Editor), proctored interview mode with eye-tracking, and group practice via shared sessions
+
+    \item Integrates \textbf{AI Coach (Gemini-powered)} for adaptive hints and feedback, resume builder with PDF export, company-specific question banks, and study plan generation
+
+    \item Features include mock interview sessions, analytics dashboard, video recording with playback, interview scheduling, community leaderboards, and enterprise candidate management
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 3: Problem Statement
+% ============================================================
+\section{Problem Statement}
+\begin{frame}{Problem Statement}
+
+Candidates preparing for software engineering interviews lack access to \textbf{realistic, on-demand mock interview environments} that simulate actual technical rounds. Generic practice platforms provide no personalised feedback, no adaptive hints, and no performance history.
+
+\vspace{8pt}
+
+Existing tools are \textbf{siloed}: resume builders, coding platforms, and scheduling tools live in separate apps with no shared context. Candidates must manage multiple subscriptions and manually track their progress across platforms.
+
+\vspace{8pt}
+
+Employers and university career centres lack \textbf{visibility into bulk candidate readiness}. There is no unified enterprise dashboard to view candidate performance metrics, schedule interviews, or manage hiring pipelines -- all without building proprietary tooling.
+
+\end{frame}
+
+% ============================================================
+% SLIDE 4: Project Objectives
+% ============================================================
+\section{Project Objectives}
+\begin{frame}{Project Objectives}{What We Built}
+\small
+\begin{itemize}
+    \item \textbf{AI Mock Interviews} -- Generate dynamic interviews from job role, tech stack \& experience; evaluate answers with Gemini AI and produce structured feedback reports
+
+    \item \textbf{Collaborative Coding (Collab)} -- Real-time shared Monaco Editor sessions with language selection, code execution, and built-in video/audio via MediaDevices
+
+    \item \textbf{AI Coach} -- Context-aware hints, answer evaluations, and progressive complexity adjustments using Gemini generative AI
+
+    \item \textbf{Resume Builder \& Analyser} -- Drag-and-drop resume editor with live preview, PDF export (html2canvas + jsPDF), and AI-powered gap analysis
+
+    \item \textbf{Proctored Mode} -- Eye-tracking overlay, tab-switch detection, and integrity monitoring during timed interview sessions
+
+    \item \textbf{Enterprise Portal} -- Organisation-level analytics, candidate pipeline management, and secret-code-gated admin access via Firebase-backed role control
+
+    \item \textbf{Deployed \& Secure} -- Clerk authentication with role-based routing, Firebase Firestore, production Vite build on Vercel
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 5: Purpose and Need
+% ============================================================
+\section{Purpose and Need}
+\begin{frame}{Purpose and Need}{Who Benefits \& Why It Matters}
+\begin{itemize}
+    \item Final-year students and job-seekers need \textbf{realistic interview simulation} with immediate, specific feedback rather than generic editorial solutions
+
+    \item Coding bootcamps and universities require \textbf{embedded career preparation tools} they can white-label and offer to enrolled students
+
+    \item Remote-first companies need \textbf{async candidate screening} -- Intervue's proctored mode and recorded sessions allow asynchronous technical evaluation
+
+    \item Group study cohorts benefit from \textbf{collaborative real-time coding} that replicates pair-programming rounds common in top-tier interviews
+
+    \item Hiring managers need \textbf{consolidated analytics} on candidate performance without building internal tooling or paying enterprise SaaS licensing fees
+
+    \item AI-generated study plans and company-specific question banks help candidates \textbf{target preparation} to specific employers and roles
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 6: Scope of the Project
+% ============================================================
+\section{Scope of the Project}
+\begin{frame}{Scope of the Project}{System Modules \& Boundaries}
+\begin{itemize}
+    \item \textbf{Candidate Module:} Role selection, mock interview generation, answer submission, feedback review, analytics, study plans, community leaderboard
+
+    \item \textbf{Collaboration Module:} Real-time shared code editor, code execution engine (JS/TS), video/audio via browser MediaDevices, invite via Clipboard API
+
+    \item \textbf{AI Intelligence:} Gemini-powered question generation, answer scoring, adaptive hints, resume gap analysis, study plan creation
+
+    \item \textbf{Proctoring Module:} Eye-tracking, tab-switch detection, timed sessions, integrity report generation
+
+    \item \textbf{Enterprise Module:} Secret-code-gated admin login, organisation analytics, candidate pipeline, setup management, Firestore-backed role control
+
+    \item \textbf{Security Layer:} Clerk authentication, route-level guards (ProtectRoutes + AdminRoute), Firebase security rules, session-scoped admin pre-auth
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 7: Social Relevance & SDGs
+% ============================================================
+\section{Social Relevance \& SDGs}
+\begin{frame}{Social Relevance \& UN SDGs}{Alignment \& Impact}
+\small
+\textbf{Social Relevance:}
+\begin{itemize}\setlength{\itemsep}{1pt}
+    \item Democratises interview preparation regardless of coaching affordability
+    \item AI feedback removes dependency on expensive human mentors
+    \item Collaborative coding bridges geography gaps for remote learners
+    \item Enterprise dashboard helps career centres place more students into jobs
+\end{itemize}
+
+\vspace{2pt}
+
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{|c|l|p{5cm}|}
+\hline
+\textbf{SDG} & \textbf{Title} & \textbf{Contribution} \\ \hline
+4 & Quality Education & AI-driven personalised learning \& skill building \\ \hline
+8 & Decent Work \& Growth & Improved employment readiness for all candidates \\ \hline
+9 & Industry \& Innovation & AI/LLM, real-time collab, cloud-native architecture \\ \hline
+10 & Reduced Inequalities & Free access to quality preparation tools \\ \hline
+\end{tabular}
+\caption{SDG Assessment}
+\end{table}
+\end{frame}
+
+% ============================================================
+% SLIDE 8: SRS Overview
+% ============================================================
+\section{Software Requirements Specification}
+\begin{frame}{Software Requirements Specification (SRS)}{Hardware \& Software Requirements}
+\textbf{Hardware Requirements:}
+\begin{itemize}
+    \item Processor: Intel i3+ / Apple M1+
+    \item RAM: 4 GB minimum
+    \item Webcam \& Microphone for video/proctored sessions
+    \item Internet: 2 Mbps minimum
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Software Requirements:}
+\begin{itemize}
+    \item OS: Windows 10+ / macOS / Linux
+    \item Browser: Chrome 90+, Firefox 88+, Edge 90+
+    \item Node.js 18+, npm (Development), Vite 4+ (Build)
+    \item Git, Firebase CLI, Clerk Dashboard account
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 8.1: Functional Requirements
+% ============================================================
+\begin{frame}{Software Requirements Specification (SRS)}{Functional Requirements}
+\small
+\begin{itemize}
+    \item \textbf{FR-01:} User selects role (Candidate / Enterprise) on the login selection screen
+
+    \item \textbf{FR-02:} Clerk-based sign-in and sign-up with dark theme and brand colour
+
+    \item \textbf{FR-03:} Candidate configures interview: job role, years of experience, tech stack
+
+    \item \textbf{FR-04:} Gemini AI generates interview questions tailored to the configuration
+
+    \item \textbf{FR-05:} Candidate answers questions; AI scores and provides detailed feedback
+
+    \item \textbf{FR-06:} Analytics dashboard tracks streak, badges, score history, and skill radar
+
+    \item \textbf{FR-07:} Collaboration session opens shared Monaco Editor with live code execution
+
+    \item \textbf{FR-08:} Proctored mode activates eye-tracking and tab-switch detection
+
+    \item \textbf{FR-09:} Resume builder renders live preview and exports to PDF
+
+    \item \textbf{FR-10:} Enterprise admin enters secret code (Firestore-verified) to access portal
+
+    \item \textbf{FR-11:} Enterprise dashboard shows candidate stats, score distributions, and pipeline
+
+    \item \textbf{FR-12:} Study plan generator creates personalised topic roadmaps via Gemini AI
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 8.2: Non-Functional Requirements
+% ============================================================
+\begin{frame}{Software Requirements Specification (SRS)}{Non-Functional Requirements}
+
+\textbf{Performance}
+\begin{itemize}
+    \item Page load time under 2 seconds on 4G connection (Vite code splitting)
+    \item AI response latency under 3 seconds for 90\% of Gemini API calls
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Security}
+\begin{itemize}
+    \item All routes protected via Clerk-issued JWT session tokens
+    \item Admin portal requires Firestore-verified secret code pre-auth
+    \item Firebase Firestore security rules restrict data per \texttt{userId}
+    \item Session-scoped \texttt{sessionStorage} for admin pre-auth flag
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Scalability \& Usability}
+\begin{itemize}
+    \item Stateless React SPA enables horizontal CDN scaling on Vercel
+    \item Responsive design supporting mobile, tablet, desktop
+    \item Dark-themed UI with teal-mint gradients matching brand identity
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 9: System Architecture
+% ============================================================
+\section{System Architecture}
+\begin{frame}{System Architecture}{Block Diagram}
+\centering
+\includegraphics[width=0.9\textwidth,height=0.75\textheight,keepaspectratio]{Images/System_Architecture.png}
+\end{frame}
+
+% ============================================================
+% SLIDE 10: Application Architecture Design
+% ============================================================
+\section{Application Architecture Design}
+\begin{frame}{Application Architecture Design}{Layered Architecture}
+\centering
+\includegraphics[width=0.88\textwidth,height=0.75\textheight,keepaspectratio]{Images/App_Architecture.png}
+\end{frame}
+
+% ============================================================
+% SLIDE 11: GUI Design (Mockups)
+% ============================================================
+\section{GUI Design}
+\begin{frame}{GUI Design}{Design Principles \& Key Screens}
+\textbf{Design Principles:}
+\begin{itemize}
+    \item Dark theme primary (obsidian black) with teal-mint gradient accents (\texttt{\#017373}, \texttt{\#AAD9D1})
+    \item Glassmorphism cards, backdrop blur, smooth Framer Motion animations
+    \item shadcn/ui component library, TailwindCSS, Lucide React icons
+    \item Role-selection screen with animated cards before Clerk authentication
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Key Screens:}
+\begin{columns}
+\column{0.48\textwidth}
+\begin{enumerate}
+    \item Landing Page (Dark Theme)
+    \item Role Selection Screen
+    \item Sign In / Sign Up (Clerk)
+    \item Candidate Dashboard
+\end{enumerate}
+\column{0.48\textwidth}
+\begin{enumerate}\setcounter{enumi}{4}
+    \item Mock Interview Session
+    \item Collaboration Editor
+    \item Resume Builder
+    \item Enterprise Dashboard
+\end{enumerate}
+\end{columns}
+\end{frame}
+
+% GUI Screenshots - Landing Page
+\begin{frame}{GUI Design}{Landing Page}
+\begin{columns}
+\column{0.48\textwidth}
+\centering
+\textbf{Hero Section}\\[3pt]
+\includegraphics[width=\textwidth,height=0.65\textheight,keepaspectratio]{Images/heroIntervue.png}
+\column{0.48\textwidth}
+\centering
+\textbf{Features Section}\\[3pt]
+\includegraphics[width=\textwidth,height=0.65\textheight,keepaspectratio]{Images/featuresIntervue.png}
+\end{columns}
+\end{frame}
+
+% GUI Screenshots - Authentication
+\begin{frame}{GUI Design}{Authentication Screens}
+\begin{columns}
+\column{0.48\textwidth}
+\centering
+\textbf{Role Selection}\\[3pt]
+\includegraphics[width=\textwidth,height=0.65\textheight,keepaspectratio]{Images/roleSelection.png}
+\column{0.48\textwidth}
+\centering
+\textbf{Sign In (Dark Theme)}\\[3pt]
+\includegraphics[width=\textwidth,height=0.65\textheight,keepaspectratio]{Images/signIn.png}
+\end{columns}
+\end{frame}
+
+% GUI Screenshots - Dashboards
+\begin{frame}{GUI Design}{Role-Based Dashboards}
+\begin{columns}
+\column{0.32\textwidth}
+\centering
+\textbf{Candidate}\\[3pt]
+\includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{Images/candidateDash.png}
+\column{0.32\textwidth}
+\centering
+\textbf{Mock Interview}\\[3pt]
+\includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{Images/mockInterview.png}
+\column{0.32\textwidth}
+\centering
+\textbf{Enterprise}\\[3pt]
+\includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{Images/enterpriseDash.png}
+\end{columns}
+\end{frame}
+
+% GUI Screenshot - Collaboration
+\begin{frame}{GUI Design}{Collaborative Coding Session}
+\centering
+\includegraphics[width=0.85\textwidth,height=0.75\textheight,keepaspectratio]{Images/collab.png}
+\end{frame}
+
+% ============================================================
+% SLIDE 12: API Design
+% ============================================================
+\section{API Design}
+\begin{frame}{API Design}{Firebase \& Gemini Service Overview}
+\scriptsize
+\begin{table}
+\centering
+\begin{tabular}{|l|l|p{4.5cm}|}
+\hline
+\textbf{Service} & \textbf{Operation} & \textbf{Description} \\ \hline
+Firestore & addDoc / interviews & Create new mock interview record \\ \hline
+Firestore & getDocs / interviews & Fetch candidate's interview history \\ \hline
+Firestore & updateDoc & Save interview answers and scores \\ \hline
+Firestore & getDoc / admin\_codes & Verify enterprise secret code \\ \hline
+Firestore & getDocs / userAnswers & Aggregate feedback for analytics \\ \hline
+Gemini AI & generateContent & Generate interview questions \\ \hline
+Gemini AI & generateContent & Score candidate answers \\ \hline
+Gemini AI & generateContent & Generate study plan roadmap \\ \hline
+Gemini AI & generateContent & Resume gap analysis \\ \hline
+Clerk Auth & useAuth / useUser & Session management, role metadata \\ \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{API Design}{Gemini Prompt Engineering Patterns}
+\scriptsize
+\begin{table}
+\centering
+\begin{tabular}{|l|l|p{4.5cm}|}
+\hline
+\textbf{Feature} & \textbf{Model} & \textbf{Prompt Strategy} \\ \hline
+Question Generation & gemini-1.5-flash & Role + stack + experience structured prompt \\ \hline
+Answer Scoring & gemini-1.5-flash & Answer + context, JSON score output \\ \hline
+AI Coach Hints & gemini-1.5-flash & Progressive hint levels, no spoilers \\ \hline
+Study Plan & gemini-1.5-flash & Gap topics input, week-by-week plan output \\ \hline
+Resume Analysis & gemini-1.5-flash & Resume text + JD, gap list output \\ \hline
+\end{tabular}
+\end{table}
+
+\vspace{4pt}
+\textbf{Design Principles:} Structured JSON prompts, temperature tuning per use case, error boundary retry logic, streamed output for coaching hints.
+\end{frame}
+
+% ============================================================
+% SLIDE 13: Database Design
+% ============================================================
+\section{Database Design}
+\begin{frame}{Database Design}{Firestore Collection Overview}
+\scriptsize
+\begin{block}{interviews}
+\begin{itemize}
+    \item id (auto), userId, jobPosition, jobExperience, techStack, createdAt, updatedAt
+\end{itemize}
+\end{block}
+
+\begin{block}{userAnswers}
+\begin{itemize}
+    \item id (auto), mockIdRef, userId, question, correctAnswer, userAnswer, rating, feedback, createdAt
+\end{itemize}
+\end{block}
+
+\begin{block}{studyPlans}
+\begin{itemize}
+    \item id (auto), userId, plan (array of weeks), targetRole, generatedAt
+\end{itemize}
+\end{block}
+
+\begin{block}{admin\_codes}
+\begin{itemize}
+    \item id (e.g. ``admin1''), code (hashed secret), updatedAt
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Database Design}{Firestore Collection Overview (cont.)}
+\scriptsize
+\begin{block}{groupSessions}
+\begin{itemize}
+    \item id (auto), createdBy (userId), participants (array), code, language, createdAt
+\end{itemize}
+\end{block}
+
+\begin{block}{resumeProfiles}
+\begin{itemize}
+    \item id (auto), userId, name, email, phone, summary, experience (array), skills (array), updatedAt
+\end{itemize}
+\end{block}
+
+\begin{block}{scheduledInterviews}
+\begin{itemize}
+    \item id (auto), userId, interviewId, scheduledAt, title, notes, status
+\end{itemize}
+\end{block}
+
+\begin{block}{badges}
+\begin{itemize}
+    \item id (auto), userId, badgeType, earnedAt
+\end{itemize}
+\end{block}
+
+\vspace{3pt}
+\textbf{Total Collections: 8} | \textbf{IDs:} Firestore auto-ID | \textbf{Security:} userId-scoped rules
+\end{frame}
+
+% ER Diagram Image
+\begin{frame}{Database Design}{ER Diagram}
+\centering
+\includegraphics[width=0.9\textwidth,height=0.78\textheight,keepaspectratio]{Images/ER_Diagram.png}
+\end{frame}
+
+% ============================================================
+% SLIDE 14: Technology Stack
+% ============================================================
+\section{Technology Stack}
+\begin{frame}{Technology Stack}{Languages, Frameworks \& Tools}
+\textbf{Frontend:}
+\begin{itemize}
+    \item React 18 + TypeScript, Vite 4 (build tool), Framer Motion animations
+    \item TailwindCSS + shadcn/ui, Lucide React icons, Monaco Editor
+    \item React Router v6, Recharts, html2canvas + jsPDF (resume export)
+    \item Deployed on \textbf{Vercel}
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Backend \& AI:}
+\begin{itemize}
+    \item Firebase Firestore (NoSQL), Firebase Auth (Clerk overlay)
+    \item Google Gemini AI (gemini-1.5-flash) via \texttt{@google/generative-ai}
+    \item Clerk (authentication + role metadata + dark theme)
+    \item \texttt{@clerk/themes} for branded sign-in/sign-up appearance
+\end{itemize}
+
+\vspace{3pt}
+
+\textbf{Tooling \& Security:}
+\begin{itemize}
+    \item Vitest + React Testing Library v14 (unit \& integration tests)
+    \item ESLint, TypeScript strict mode, Vite code splitting
+    \item AdminRoute guard + sessionStorage pre-auth + Firestore secret code
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDES 15-19: Modules with Flow Charts
+% ============================================================
+\section{Modules \& Flow Charts}
+
+% SLIDE 15: Interview Module
+\begin{frame}{Module 1: Mock Interview Module}{Flow Chart}
+\begin{columns}
+\column{0.45\textwidth}
+\small
+\textbf{Key Operations:}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Select job role \& tech stack
+    \item Configure experience level
+    \item Gemini generates questions
+    \item Candidate records answers
+    \item AI scores \& gives feedback
+    \item View feedback report
+    \item Save to history
+    \item Earn badges on milestones
+\end{itemize}
+\column{0.52\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{Images/Module_Interview.png}
+\end{columns}
+\end{frame}
+
+% SLIDE 16: Collaboration Module
+\begin{frame}{Module 2: Collaboration Module}{Flow Chart}
+\begin{columns}
+\column{0.45\textwidth}
+\small
+\textbf{Key Operations:}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Start session / join room
+    \item Open Monaco Editor
+    \item Select language
+    \item Write code collaboratively
+    \item Click Run Code (JS/TS eval)
+    \item View terminal output
+    \item Toggle camera / mic
+    \item Invite via clipboard
+    \item End \& redirect
+\end{itemize}
+\column{0.52\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{Images/Module_Collab.png}
+\end{columns}
+\end{frame}
+
+% SLIDE 17: Enterprise Module
+\begin{frame}{Module 3: Enterprise Admin Module}{Flow Chart}
+\begin{columns}
+\column{0.45\textwidth}
+\small
+\textbf{Key Operations:}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Select ``Enterprise'' on role screen
+    \item Enter secret code (modal)
+    \item Firestore code verification
+    \item Sign in via Clerk (admin theme)
+    \item View org-wide analytics
+    \item Browse candidate pipeline
+    \item Filter by score / role
+    \item Manage system setup
+\end{itemize}
+\column{0.52\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{Images/Module_Admin.png}
+\end{columns}
+\end{frame}
+
+% SLIDE 18: AI Coach Module
+\begin{frame}{Module 4: AI Coach Module}{Flow Chart}
+\begin{columns}
+\column{0.45\textwidth}
+\small
+\textbf{Key Operations:}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Load current interview question
+    \item Request hint (level 1--3)
+    \item Gemini generates adaptive hint
+    \item Submit answer for evaluation
+    \item Receive structured score
+    \item Get improvement suggestions
+    \item Track coaching history
+\end{itemize}
+\column{0.52\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{Images/Module_AI.png}
+\end{columns}
+\end{frame}
+
+% SLIDE 19: Resume Module
+\begin{frame}{Module 5: Resume Builder \& Analyser}{Flow Chart}
+\begin{columns}
+\column{0.45\textwidth}
+\small
+\textbf{Key Operations:}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Fill profile, experience, skills
+    \item Live preview renders in real-time
+    \item Add / remove experience entries
+    \item Upload JD for AI gap analysis
+    \item Gemini identifies missing skills
+    \item Export to PDF (html2canvas)
+    \item Save to Firestore profile
+\end{itemize}
+\column{0.52\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{Images/Module_Resume.png}
+\end{columns}
+\end{frame}
+
+% ============================================================
+% SLIDES 20-25: Algorithms / Procedures
+% ============================================================
+\section{Algorithms / Procedures}
+
+% SLIDE 20: Clerk Authentication
+\begin{frame}{Algorithm 1}{Clerk Authentication \& Role Routing}
+\textbf{Sign-Up:}
+\begin{enumerate}
+    \item User visits \texttt{/select-role} and selects Candidate or Enterprise
+    \item Enterprise path: modal prompts for secret code; Firestore verifies
+    \item If verified: \texttt{sessionStorage.setItem(``admin\_preauth'', ``true'')}
+    \item Redirect to \texttt{/signin} with role state passed via React Router
+    \item Clerk renders branded dark-theme sign-in; user completes registration
+    \item On success: Clerk issues session token; React Router redirects to dashboard
+\end{enumerate}
+
+\vspace{3pt}
+\textbf{Route Protection:}
+\begin{enumerate}
+    \item \texttt{ProtectRoutes} wraps all authenticated pages; redirects to \texttt{/signin} if no session
+    \item \texttt{AdminRoute} additionally checks \texttt{user.publicMetadata.role === 'admin'} or \texttt{admin\_preauth}
+    \item Redirect to \texttt{/select-role} with toast on denial
+\end{enumerate}
+\end{frame}
+
+% SLIDE 21: Interview Generation
+\begin{frame}{Algorithm 2}{AI Interview Generation \& Scoring}
+\begin{enumerate}
+    \item Candidate submits: \texttt{jobPosition}, \texttt{jobExperience}, \texttt{techStack}
+
+    \item \textbf{Prompt Construction:} Structured JSON prompt sent to Gemini 1.5 Flash
+
+    \item \textbf{Response Parsing:} Extract JSON array of \texttt{\{question, answer\}} objects
+
+    \item \textbf{Persistence:} Write interview record to Firestore \texttt{interviews} collection
+
+    \item \textbf{Answer Submission:} Each answer sent with question context to Gemini
+
+    \item \textbf{Scoring Algorithm:}
+    \begin{itemize}
+        \item Gemini returns: \texttt{rating} (1--10), \texttt{feedback} (string), \texttt{correctAnswer}
+        \item Frontend renders structured feedback card per question
+    \end{itemize}
+
+    \item \textbf{Persistence:} Write each \texttt{userAnswer} with score to Firestore
+
+    \item \textbf{Analytics Update:} Recompute streak, average rating, badge eligibility
+\end{enumerate}
+\end{frame}
+
+% SLIDE 22: Collaboration Code Execution
+\begin{frame}{Algorithm 3}{Collaborative Code Execution (Browser-Safe)}
+\begin{enumerate}
+    \item Candidate writes JavaScript or TypeScript in Monaco Editor
+
+    \item \textbf{Language Check:} Only JS/TS executed; others show ``unsupported'' message
+
+    \item \textbf{Console Capture:} Override \texttt{console.log} to capture output to array
+
+    \item \textbf{Execution:}
+    \begin{itemize}
+        \item Wrap code in try/catch
+        \item Execute via \texttt{eval(code)} in isolated branch
+        \item Restore \texttt{console.log} in \texttt{finally} block
+    \end{itemize}
+
+    \item \textbf{Output Rendering:} Write captured logs to terminal panel below editor
+
+    \item \textbf{Error Handling:} Catch runtime errors; display \texttt{Error: \{message\}} in terminal
+
+    \item \textbf{Camera/Mic:} \texttt{navigator.mediaDevices.getUserMedia} on toggle; stream attached to \texttt{<video>} ref; tracks stopped on toggle-off
+
+    \item \textbf{Invite:} \texttt{navigator.clipboard.writeText(window.location.href)} on click
+\end{enumerate}
+\end{frame}
+
+% SLIDE 23: Admin Access Control
+\begin{frame}{Algorithm 4}{Enterprise Admin Access Control}
+\textbf{Secret Code Verification Pipeline:}
+\begin{enumerate}
+    \item User clicks ``Enterprise'' card on \texttt{/select-role}
+    \item Dialog modal opens with password input (max 6 chars)
+    \item On submit: \texttt{getDoc(doc(db, ``admin\_codes'', ``admin1''))}
+    \item Compare: \texttt{docSnap.data().code === enteredCode}
+    \item If match: set \texttt{sessionStorage} flag; navigate to \texttt{/signin}
+    \item If mismatch: show toast error; do not navigate
+\end{enumerate}
+
+\vspace{3pt}
+\textbf{AdminRoute Permission Matrix:}
+\begin{table}
+\centering
+\footnotesize
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Action} & \textbf{Candidate} & \textbf{Admin} \\ \hline
+View Mock Interviews & $\checkmark$ & \\ \hline
+Access Enterprise Dashboard & & $\checkmark$ \\ \hline
+Access Setup Page & & $\checkmark$ \\ \hline
+View Org Analytics & & $\checkmark$ \\ \hline
+Manage Candidates & & $\checkmark$ \\ \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+% SLIDE 24: Proctored Mode
+\begin{frame}{Algorithm 5}{Proctored Interview Mode}
+\begin{enumerate}
+    \item Candidate starts session in Proctored Mode
+
+    \item \textbf{Camera Activation:} \texttt{getUserMedia} captures video feed for eye tracking
+
+    \item \textbf{Tab-Switch Detection:}
+    \begin{itemize}
+        \item \texttt{document.addEventListener('visibilitychange', handler)}
+        \item Increment violation counter; display warning overlay at threshold
+    \end{itemize}
+
+    \item \textbf{Eye-Tracking Overlay:} Face landmarks API (or heuristic gaze detection) flags looking away for $>$3 seconds
+
+    \item \textbf{Integrity Timer:} Countdown per question; auto-advance on timeout
+
+    \item \textbf{Report Generation:} At session end, compile: violations count, time-per-question, gaze scores
+
+    \item Return success; frontend displays integrity report card
+\end{enumerate}
+\end{frame}
+
+% SLIDE 25: Analytics Computation
+\begin{frame}{Algorithm 6}{Analytics \& Badge Computation}
+\textbf{Analytics Procedure:}
+\begin{enumerate}
+    \item Fetch all \texttt{userAnswers} for current user from Firestore
+    \item Group by \texttt{mockIdRef} to compute per-interview average rating
+    \item Compute overall average, best score, total sessions
+    \item Calculate skill distribution from \texttt{techStack} fields
+    \item Determine streak: consecutive days with completed sessions
+\end{enumerate}
+
+\vspace{3pt}
+\textbf{Badge Triggers:}
+\begin{itemize}
+    \item First Interview Completed -- Authentication events
+    \item 5-Day Streak -- Consecutive daily sessions
+    \item Perfect Score -- Rating $\geq$ 9.5 on all questions
+    \item Collab Master -- 3+ collaborative sessions completed
+    \item Resume Pro -- Resume exported to PDF
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 26: Coding Standards & Environment Setup
+% ============================================================
+\section{Coding Standards \& Environment}
+\begin{frame}{Coding Standards}
+\small
+\begin{columns}[t]
+\column{0.48\textwidth}
+\textbf{Coding Standards:}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item TypeScript strict mode (all files)
+    \item ESLint + React Hooks plugin
+    \item Component-based architecture (shadcn/ui)
+    \item camelCase variables; PascalCase components
+    \item Zod schemas for form input validation
+\end{itemize}
+\column{0.48\textwidth}
+\textbf{Project Structure:}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item \texttt{src/routes/} -- Page components
+    \item \texttt{src/components/} -- Reusable UI
+    \item \texttt{src/layouts/} -- Route guards
+    \item \texttt{src/lib/} -- AI, helpers, admin init
+    \item \texttt{src/config/} -- Firebase config
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Environment Setup \& Source Code Control}
+\small
+\begin{columns}[t]
+\column{0.48\textwidth}
+\textbf{Environment Setup:}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item \texttt{.env} for Clerk keys, Firebase, Gemini
+    \item \texttt{.env.example} for onboarding
+    \item Vite dev server (port 5173)
+    \item Firebase Emulator (optional local dev)
+\end{itemize}
+\column{0.48\textwidth}
+\textbf{Source Code Control:}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Git + GitHub
+    \item Repo: \texttt{pagaus/Intervue}
+    \item Feature branch workflow
+    \item CI/CD: Push to \texttt{main} $\rightarrow$ auto-deploy Vercel
+\end{itemize}
+\end{columns}
+\end{frame}
+
+% ============================================================
+% SLIDE 27: Unit Testing
+% ============================================================
+\section{Testing}
+\begin{frame}{Unit Testing}{Testing Individual Functions}
+\scriptsize
+\begin{table}
+\centering
+\begin{tabular}{|p{3cm}|p{4cm}|c|}
+\hline
+\textbf{Function / Module} & \textbf{Test Case} & \textbf{Status} \\ \hline
+\texttt{ResumeBuilderPage} & Renders empty profile layout & \textcolor{green}{PASS} \\ \hline
+\texttt{ResumeBuilderPage} & Name input updates live preview & \textcolor{green}{PASS} \\ \hline
+\texttt{ResumeBuilderPage} & Add skill via button click & \textcolor{green}{PASS} \\ \hline
+\texttt{App routing} & \texttt{/signin} route renders & \textcolor{green}{PASS} \\ \hline
+\texttt{AdminRoute} & Non-admin redirected to \texttt{/select-role} & \textcolor{green}{PASS} \\ \hline
+\texttt{verifyCode()} & Wrong code shows error toast & \textcolor{green}{PASS} \\ \hline
+\texttt{verifyCode()} & Correct code sets sessionStorage flag & \textcolor{green}{PASS} \\ \hline
+\texttt{handleRunCode()} & JS console.log captured in output & \textcolor{green}{PASS} \\ \hline
+\texttt{handleRunCode()} & Runtime error shown in terminal & \textcolor{green}{PASS} \\ \hline
+\texttt{initializeAdminCode()} & Skips if document already exists & \textcolor{green}{PASS} \\ \hline
+\texttt{handleInvite()} & URL written to clipboard & \textcolor{green}{PASS} \\ \hline
+\texttt{setupMedia()} & Camera stream attached to video ref & \textcolor{green}{PASS} \\ \hline
+\end{tabular}
+\caption{Unit Test Results Summary}
+\end{table}
+\end{frame}
+
+% ============================================================
+% SLIDE 28: Integration Testing
+% ============================================================
+\begin{frame}{Integration Testing}{Testing Component Interactions}
+\scriptsize
+\begin{table}
+\centering
+\begin{tabular}{|p{4cm}|p{4cm}|c|}
+\hline
+\textbf{Integration Test} & \textbf{Verification} & \textbf{Status} \\ \hline
+Role select $\rightarrow$ Sign In & Theme colour matches selected role & \textcolor{green}{PASS} \\ \hline
+Enterprise modal $\rightarrow$ Firestore & Secret code verified against DB & \textcolor{green}{PASS} \\ \hline
+Interview config $\rightarrow$ Gemini & Questions returned as JSON array & \textcolor{green}{PASS} \\ \hline
+Answer submit $\rightarrow$ Score & Rating + feedback stored in Firestore & \textcolor{green}{PASS} \\ \hline
+Collab editor $\rightarrow$ Run Code & JS output rendered in terminal & \textcolor{green}{PASS} \\ \hline
+Video toggle $\rightarrow$ Camera & getUserMedia stream shown in view & \textcolor{green}{PASS} \\ \hline
+Resume form $\rightarrow$ Preview & Live preview updates on keystroke & \textcolor{green}{PASS} \\ \hline
+PDF export $\rightarrow$ Download & html2canvas renders, jsPDF saves & \textcolor{green}{PASS} \\ \hline
+Analytics fetch $\rightarrow$ Dashboard & Score history chart reflects DB & \textcolor{green}{PASS} \\ \hline
+Admin route $\rightarrow$ Guard & Unauthenticated user redirected & \textcolor{green}{PASS} \\ \hline
+\end{tabular}
+\caption{Integration Test Results Summary}
+\end{table}
+\end{frame}
+
+% ============================================================
+% SLIDE 29: Functional Testing
+% ============================================================
+\begin{frame}{Functional Testing}{End-to-End User Flows}
+\scriptsize
+\begin{table}
+\centering
+\begin{tabular}{|p{4.5cm}|p{3.5cm}|c|}
+\hline
+\textbf{Test Scenario} & \textbf{Expected Result} & \textbf{Status} \\ \hline
+User visits landing, clicks Get Started & Navigates to \texttt{/select-role} & \textcolor{green}{PASS} \\ \hline
+Selects Candidate, signs in & Dashboard renders with streak & \textcolor{green}{PASS} \\ \hline
+Selects Enterprise, wrong code & Error toast, no navigation & \textcolor{green}{PASS} \\ \hline
+Selects Enterprise, correct code & Proceeds to Enterprise Sign In & \textcolor{green}{PASS} \\ \hline
+Configures \& starts mock interview & 5 questions generated by AI & \textcolor{green}{PASS} \\ \hline
+Submits answer, views feedback & Score and feedback displayed & \textcolor{green}{PASS} \\ \hline
+Opens collab, types JS code, runs & Output in terminal panel & \textcolor{green}{PASS} \\ \hline
+Proctored mode, switches tab & Violation counter increments & \textcolor{green}{PASS} \\ \hline
+Resume builder: adds experience & Live preview updates & \textcolor{green}{PASS} \\ \hline
+Clicks Export PDF & PDF downloaded to local device & \textcolor{green}{PASS} \\ \hline
+Enterprise admin views dashboard & Org-wide stats rendered & \textcolor{green}{PASS} \\ \hline
+Direct nav to /enterprise as guest & Redirected to \texttt{/select-role} & \textcolor{green}{PASS} \\ \hline
+\end{tabular}
+\caption{Functional Test Results Summary}
+\end{table}
+\end{frame}
+
+% ============================================================
+% SLIDE 30: Load Testing
+% ============================================================
+\begin{frame}{Load Testing}{Performance Under Stress}
+\scriptsize
+\textbf{Tool:} Lighthouse CI + manual concurrent browser tabs on Vercel
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{|p{2.8cm}|c|c|c|}
+\hline
+\textbf{Feature} & \textbf{Users} & \textbf{Avg (ms)} & \textbf{Err} \\ \hline
+Landing Page load & 100 & 980 & 0\% \\ \hline
+Clerk Sign In & 50 & 1200 & 0\% \\ \hline
+Gemini Question Gen & 30 & 2400 & 2\% \\ \hline
+Firestore Read & 100 & 180 & 0\% \\ \hline
+Firestore Write & 50 & 250 & 0\% \\ \hline
+PDF Export (html2canvas) & 20 & 3100 & 0\% \\ \hline
+\end{tabular}
+\end{table}
+\textbf{Observations:}
+\begin{itemize}\setlength{\itemsep}{1pt}
+    \item Firestore reads/writes well under 300ms at 100 concurrent users
+    \item Gemini AI latency $\sim$2.4s -- inherent external API dependency
+    \item PDF export slowest at 3.1s due to canvas render of full page
+    \item Vite code splitting keeps initial JS bundle under 200 KB gzipped
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 31: Bug Report & Resolve
+% ============================================================
+\section{Bug Report \& Resolve}
+\begin{frame}{Bug Report \& Resolve}
+\tiny
+\begin{table}
+\centering
+\begin{tabular}{|c|p{2cm}|c|p{2.8cm}|c|}
+\hline
+\textbf{ID} & \textbf{Bug} & \textbf{Sev.} & \textbf{Resolution} & \textbf{Status} \\ \hline
+B-01 & Camera not released on toggle-off & High & \texttt{track.stop()} all tracks in cleanup & Fixed \\ \hline
+B-02 & fireEvent not found in RTL types & High & Downgraded to RTL v14 & Fixed \\ \hline
+B-03 & @clerk/themes missing package & Med & Reinstalled with \texttt{--legacy-peer-deps} & Fixed \\ \hline
+B-04 & Admin route accessible without code & Med & Added AdminRoute + sessionStorage check & Fixed \\ \hline
+B-05 & PDF export blank on first click & Med & Added async await to html2canvas call & Fixed \\ \hline
+B-06 & Role state lost on page refresh & Low & Passed via React Router location.state & Fixed \\ \hline
+B-07 & Dark dialog text not visible & Low & Added explicit text-white and bg-slate-900 & Fixed \\ \hline
+B-08 & App.tsx import missing SelectRolePage & Low & Added import from \texttt{./routes/select-role} & Fixed \\ \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+% ============================================================
+% SLIDE 32: Deployment
+% ============================================================
+\section{Deployment}
+\begin{frame}{Deployment}{Cloud Infrastructure}
+\scriptsize
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{|l|l|p{3.8cm}|}
+\hline
+\textbf{Component} & \textbf{Platform} & \textbf{Details} \\ \hline
+Frontend & Vercel & React SPA, auto-deploy, CDN, SSL \\ \hline
+Authentication & Clerk & OAuth, JWT, role metadata, branded UI \\ \hline
+Database & Firebase Firestore & NoSQL, real-time, userId-scoped rules \\ \hline
+AI & Google Gemini & gemini-1.5-flash, REST via SDK \\ \hline
+Media & Browser MediaDevices & No TURN server needed (local camera) \\ \hline
+\end{tabular}
+\end{table}
+\textbf{CI/CD:} \texttt{git push main} $\rightarrow$ Vercel ($\sim$1m build)\\
+\textbf{Frontend:} \texttt{https://intervue.vercel.app}\\
+\textbf{Firebase:} \texttt{us-central1} region, Spark plan
+\end{frame}
+
+% ============================================================
+% SLIDE 33: Individual Contributions
+% ============================================================
+\section{Status of Work}
+\begin{frame}{Status of Work}{Individual Contributions}
+\tiny
+\begin{table}
+\centering
+\begin{tabular}{|p{3.8cm}|p{2.8cm}|c|}
+\hline
+\textbf{Module} & \textbf{Contributors} & \textbf{\%} \\ \hline
+System Architecture \& Design & Pagau & 100 \\ \hline
+Frontend UI (React, TypeScript) & Pagau & 100 \\ \hline
+Firebase Integration & Pagau & 100 \\ \hline
+Clerk Auth \& Role Routing & Pagau & 100 \\ \hline
+Gemini AI Integration & Pagau & 100 \\ \hline
+Mock Interview Engine & Pagau & 100 \\ \hline
+Collaboration Editor & Pagau & 100 \\ \hline
+Code Execution Engine & Pagau & 100 \\ \hline
+Proctored Mode & Pagau & 100 \\ \hline
+Resume Builder \& PDF Export & Pagau & 100 \\ \hline
+Enterprise Admin Portal & Pagau & 100 \\ \hline
+Secret Code Access Control & Pagau & 100 \\ \hline
+Analytics Dashboard & Pagau & 100 \\ \hline
+CI/CD \& Deployment & Pagau & 100 \\ \hline
+Testing \& Bug Fixes & Pagau & 100 \\ \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+% ============================================================
+% SLIDE 34: Demonstration of Working Models
+% ============================================================
+\section{Demonstration}
+\begin{frame}{Demonstration of Working Models}
+\small
+\textbf{Live:} \texttt{https://intervue.vercel.app}
+\begin{columns}[t]
+\column{0.48\textwidth}
+\begin{enumerate}\setlength{\itemsep}{1pt}
+    \item Landing Page
+    \item Role Selection Screen
+    \item Candidate Sign In \& Dashboard
+    \item Mock Interview Session
+    \item AI Feedback Report
+\end{enumerate}
+\column{0.48\textwidth}
+\begin{enumerate}\setlength{\itemsep}{1pt}\setcounter{enumi}{5}
+    \item Collaborative Code Editor
+    \item Resume Builder \& PDF Export
+    \item Enterprise Code Verification
+    \item Enterprise Analytics Dashboard
+    \item Proctored Interview Mode
+\end{enumerate}
+\end{columns}
+\end{frame}
+
+% ============================================================
+% SLIDE 35: Screenshots
+% ============================================================
+\section{Screenshots}
+
+% Role Selection
+\begin{frame}{Screenshots}{Role Selection \& Login}
+\begin{columns}
+\column{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{Images/roleSelect.png}
+\column{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{Images/enterpriseCode.png}
+\column{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{Images/signInDark.png}
+\end{columns}
+\end{frame}
+
+% Mock Interview
+\begin{frame}{Screenshots}{Mock Interview Session}
+\centering
+\includegraphics[width=0.85\textwidth,height=0.78\textheight,keepaspectratio]{Images/mockInterviewSession.png}
+\end{frame}
+
+% AI Feedback
+\begin{frame}{Screenshots}{AI Feedback Report}
+\centering
+\includegraphics[width=0.85\textwidth,height=0.78\textheight,keepaspectratio]{Images/aiFeedback.png}
+\end{frame}
+
+% Collaboration
+\begin{frame}{Screenshots}{Collaboration Editor}
+\centering
+\includegraphics[width=0.85\textwidth,height=0.78\textheight,keepaspectratio]{Images/collabEditor.png}
+\end{frame}
+
+% Resume Builder - 2 images
+\begin{frame}{Screenshots}{Resume Builder}
+\begin{columns}
+\column{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{Images/resumeForm.png}
+\column{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{Images/resumePreview.png}
+\end{columns}
+\end{frame}
+
+% Enterprise Dashboard
+\begin{frame}{Screenshots}{Enterprise Dashboard}
+\centering
+\includegraphics[width=0.85\textwidth,height=0.78\textheight,keepaspectratio]{Images/enterpriseDashboard.png}
+\end{frame}
+
+% Analytics
+\begin{frame}{Screenshots}{Analytics Dashboard}
+\centering
+\includegraphics[width=0.85\textwidth,height=0.78\textheight,keepaspectratio]{Images/analyticsDash.png}
+\end{frame}
+
+% ============================================================
+% SLIDE 36: Project Budget
+% ============================================================
+\section{Project Budget}
+\begin{frame}{Project Budget}{Cost Breakdown}
+\begin{table}
+\centering
+\begin{tabular}{|l|l|r|}
+\hline
+\textbf{Item} & \textbf{Service} & \textbf{Cost (INR)} \\ \hline
+Frontend Hosting & Vercel (Free Tier) & 0 \\ \hline
+Authentication & Clerk (Free Tier, 10k MAU) & 0 \\ \hline
+Database & Firebase Firestore (Spark Plan) & 0 \\ \hline
+AI API & Google Gemini (Free Tier) & 0 \\ \hline
+Domain Name & Custom domain (optional) & 800/yr \\ \hline
+Development Tools & VS Code, Git, Node.js & 0 \\ \hline
+Testing & Vitest + RTL (Open Source) & 0 \\ \hline
+SSL Certificates & Auto-provisioned (Free) & 0 \\ \hline
+\hline
+\textbf{Total (MVP)} & & \textbf{0 -- 800} \\ \hline
+\end{tabular}
+\end{table}
+
+\vspace{3pt}
+\begin{center}
+\footnotesize
+\textit{Production scaling: Clerk Pro (\$25/mo), Firebase Blaze (pay-as-go), Gemini Pro (\$7/mo), Vercel Pro (\$20/mo) $\approx$ \$52/month}
+\end{center}
+\end{frame}
+
+% ============================================================
+% SLIDE 37: Project Scheduling (Gantt Chart)
+% ============================================================
+\section{Project Scheduling}
+\begin{frame}{Project Scheduling}{Gantt Chart -- 24 Week Timeline}
+\centering
+\includegraphics[width=0.95\textwidth,height=0.82\textheight,keepaspectratio]{Images/gantt_chart.png}
+\end{frame}
+
+\begin{frame}{Project Scheduling}{Detailed Phase Timeline}
+\tiny
+\begin{columns}[t]
+\column{0.48\textwidth}
+\begin{table}
+\centering
+\tiny
+\begin{tabular}{|p{2.5cm}|p{1.5cm}|c|}
+\hline
+\textbf{Phase} & \textbf{Period} & \textbf{Wk} \\ \hline
+Research \& Analysis & Wk 1--2 & 2 \\ \hline
+SRS Document & Wk 2--3 & 2 \\ \hline
+System Design & Wk 3--4 & 2 \\ \hline
+\textit{Review 1} & \textit{Wk 4} & \\ \hline
+Firebase \& Auth Setup & Wk 5--6 & 2 \\ \hline
+Gemini AI Integration & Wk 6--10 & 5 \\ \hline
+Mock Interview Engine & Wk 7--12 & 6 \\ \hline
+Collaboration Editor & Wk 8--11 & 4 \\ \hline
+Proctored Mode & Wk 10--13 & 4 \\ \hline
+AI Coach Module & Wk 11--13 & 3 \\ \hline
+\end{tabular}
+\end{table}
+\column{0.48\textwidth}
+\begin{table}
+\centering
+\tiny
+\begin{tabular}{|p{2.5cm}|p{1.5cm}|c|}
+\hline
+\textbf{Phase} & \textbf{Period} & \textbf{Wk} \\ \hline
+Enterprise Portal & Wk 12--14 & 3 \\ \hline
+Resume Builder & Wk 14--16 & 3 \\ \hline
+\textit{Review 2} & \textit{Wk 16} & \\ \hline
+Integration Testing & Wk 17--18 & 2 \\ \hline
+Security \& Load Tests & Wk 18--20 & 3 \\ \hline
+Deployment & Wk 20--21 & 2 \\ \hline
+\textit{Review 3 (Now)} & \textit{Wk 21} & \\ \hline
+Bug Fixes \& Polish & Wk 22--23 & 2 \\ \hline
+Final Presentation & Wk 23--24 & 2 \\ \hline
+\textit{Final Review} & \textit{Wk 24} & \\ \hline
+\end{tabular}
+\end{table}
+\end{columns}
+\end{frame}
+
+% ============================================================
+% SLIDE 38: Conclusion
+% ============================================================
+\section{Conclusion}
+\begin{frame}{Conclusion}
+\begin{itemize}
+    \item Intervue successfully demonstrates a \textbf{fully functional AI-powered mock interview platform} with Gemini-driven question generation, adaptive coaching, and structured feedback reports
+
+    \item The \textbf{unified career readiness suite} -- combining interviews, collaborative coding, resume builder, and proctored mode -- eliminates the need for multiple disconnected tools
+
+    \item \textbf{Firebase + Clerk architecture} provides production-grade authentication, real-time data sync, and role-based route protection with minimal operational overhead
+
+    \item The \textbf{Enterprise Portal} with Firestore-backed secret code verification and AdminRoute guard demonstrates practical access control without a dedicated backend server
+
+    \item \textbf{Collaborative features} (shared Monaco Editor, MediaDevices integration, clipboard invite) replicate real pair-programming interview environments in the browser
+
+    \item The platform is \textbf{live and deployed} on Vercel with CI/CD automation, a clean production Vite build, and passing unit test suites
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 39: Bibliography
+% ============================================================
+\section{Bibliography}
+\begin{frame}{Bibliography}
+\footnotesize
+\begin{enumerate}
+    \item React Documentation, Meta Platforms Inc., \textit{https://react.dev}, 2024
+    \item Vite Documentation, Evan You, \textit{https://vitejs.dev}, 2024
+    \item Firebase Documentation, Google LLC, \textit{https://firebase.google.com/docs}, 2024
+    \item Google Gemini API, Google DeepMind, \textit{https://ai.google.dev/docs}, 2024
+    \item Clerk Documentation, \textit{https://clerk.com/docs}, 2024
+    \item Monaco Editor (VS Code), Microsoft, \textit{https://github.com/microsoft/monaco-editor}, 2024
+    \item OWASP Authentication Cheat Sheet, \textit{https://cheatsheetseries.owasp.org}, 2024
+    \item Framer Motion Documentation, \textit{https://www.framer.com/motion}, 2024
+    \item shadcn/ui Documentation, \textit{https://ui.shadcn.com}, 2024
+    \item Vitest Documentation, \textit{https://vitest.dev}, 2024
+    \item html2canvas, \textit{https://html2canvas.hertzen.com}, 2024
+    \item jsPDF, \textit{https://github.com/parallax/jsPDF}, 2024
+    \item Recharts, \textit{https://recharts.org/en-US/guide}, 2024
+\end{enumerate}
+\end{frame}
+
+% ============================================================
+% Thank You
+% ============================================================
+\begin{frame}
+\begin{center}
+\Huge \textbf{Thank You!}\\
+\vspace{1cm}
+\Large Questions?\\
+\vspace{0.5cm}
+\normalsize
+\texttt{https://intervue.vercel.app}
+\end{center}
+\end{frame}
+
+\end{document}

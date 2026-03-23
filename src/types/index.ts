@@ -5,8 +5,17 @@ export interface User {
   name: string;
   email: string;
   imageUrl: string;
+  role?: "candidate" | "recruiter" | "admin";
+  organizationId?: string;
   createdAt: Timestamp | FieldValue;
   updateAt: Timestamp | FieldValue;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  domain: string;
+  createdAt: Timestamp;
 }
 
 export interface Interview {
@@ -17,6 +26,10 @@ export interface Interview {
   userId: string;
   techStack: string;
   questions: { question: string; answer: string }[];
+  skillQuestions?: { skill: string; question: string; expectedAnswer: string }[];
+  difficulty?: "easy" | "medium" | "hard";
+  preferredCompany?: string;
+  organizationId?: string;
   createdAt: Timestamp;
   updateAt: Timestamp;
 }
