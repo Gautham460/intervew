@@ -22,8 +22,16 @@ export async function getCompanyQuestions(company?: string, role?: string): Prom
 
     if (company || role) {
       const filters = [];
-      if (company) filters.push(where("company", "==", company));
-      if (role) filters.push(where("role", "==", role));
+      if (company) {
+        // Normalize company name (e.g. "google" -> "Google") to match Firebase exact-match limits
+        const normalizedCompany = company.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase());
+        filters.push(where("company", "==", normalizedCompany));
+      }
+      if (role) {
+        // Normalize role name (e.g. "software engineer" -> "Software Engineer")
+        const normalizedRole = role.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase());
+        filters.push(where("role", "==", normalizedRole));
+      }
       q = query(questionsRef, ...filters);
     }
 

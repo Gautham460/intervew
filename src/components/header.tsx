@@ -13,10 +13,9 @@ const Header = () => {
   const { user } = useUser();
   const location = useLocation();
   const isAdmin = user?.publicMetadata.role === "admin" || sessionStorage.getItem("admin_preauth") === "true";
-  const isInsideAdminPortal = (location.pathname.startsWith("/enterprise") || 
+  const isInsideAdminPortal = location.pathname.startsWith("/enterprise") || 
                               location.pathname.startsWith("/setup") || 
-                              (location.pathname.startsWith("/analytics") && location.search.includes("u="))) ||
-                              (isAdmin && location.pathname !== "/" && location.pathname !== "/select-role");
+                              (location.pathname.startsWith("/analytics") && location.search.includes("u="));
 
   return (
     <header className="w-full border-b duration-150 transition-all ease-in-out bg-[rgba(1,115,115,1)] text-white">
@@ -72,6 +71,22 @@ const Header = () => {
                         <span>{route.icon} {route.label}</span>
                       </NavLink>
                     ))}
+                    
+                    {/* If Admin is testing candidate features, provide a way back to Enterprise Portal */}
+                    {isAdmin && (
+                      <NavLink
+                        to="/enterprise"
+                        className={({ isActive }) =>
+                          cn(
+                            "text-sm font-medium text-white/70 hover:text-white transition-colors px-2 py-1 rounded ml-2 border border-white/20 bg-white/5",
+                            isActive && "text-white bg-white/10"
+                          )
+                        }
+                        title="Return to Enterprise Portal"
+                      >
+                        <span>🏢 Return to Admin</span>
+                      </NavLink>
+                    )}
                   </div>
                 )}
               </>

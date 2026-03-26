@@ -6,6 +6,7 @@ import {
   Mic,
   RefreshCw,
   Save,
+  Send,
   Video,
   VideoOff,
   WebcamIcon,
@@ -15,6 +16,7 @@ import useSpeechToText, { ResultType } from "react-hook-speech-to-text";
 import { useParams } from "react-router-dom";
 import WebCam from "react-webcam";
 import { TooltipButton } from "./tooltip-button";
+import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 import { chatSession } from "@/scripts";
 import { SaveModal } from "./save-modal";
@@ -77,16 +79,31 @@ export const RecordAnswer = ({
       }
 
       //   ai result
-      const aiResult = await generateResult(
+      const result = await generateResult(
         question.question,
         question.answer,
         userAnswer
       );
 
-      setAiResult(aiResult);
+      setAiResult(result);
     } else {
       startSpeechToText();
     }
+  };
+
+  const handleGetFeedback = async () => {
+    if (userAnswer?.length < 30) {
+      toast.error("Error", {
+        description: "Your answer should be more than 30 characters",
+      });
+      return;
+    }
+    const result = await generateResult(
+      question.question,
+      question.answer,
+      userAnswer
+    );
+    setAiResult(result);
   };
 
   const cleanJsonResponse = (responseText: string) => {
@@ -261,6 +278,19 @@ export const RecordAnswer = ({
         />
 
         <TooltipButton
+          content="Get Feedback"
+          icon={
+            isAiGenerating ? (
+              <Loader className="min-w-5 min-h-5 animate-spin" />
+            ) : (
+              <Send className="min-w-5 min-h-5" />
+            )
+          }
+          onClick={handleGetFeedback}
+          disbaled={isAiGenerating || userAnswer.length < 30}
+        />
+
+        <TooltipButton
           content="Save Result"
           icon={
             isAiGenerating ? (
@@ -277,9 +307,12 @@ export const RecordAnswer = ({
       <div className="w-full mt-4 p-4 border rounded-md bg-gray-50">
         <h2 className="text-lg font-semibold">Your Answer:</h2>
 
-        <p className="text-sm mt-2 text-gray-700 whitespace-normal">
-          {userAnswer || "Start recording to see your ansewer here"}
-        </p>
+        <Textarea
+          value={userAnswer}
+          onChange={(e) => setUserAnswer(e.target.value)}
+          placeholder="Start recording or type your answer securely here..."
+          className="min-h-[120px] mt-2 resize-y"
+        />
 
         {interimResult && (
           <p className="text-sm text-gray-500 mt-2">

@@ -34,6 +34,8 @@ import { db } from "@/config/firebase.config";
 import { ResumeUpload } from "./resume-upload";
 import { SkillMatch } from "@/lib/resume-parser";
 import { fetchQuestionsForSkills } from "@/lib/skill-questions-db";
+import { getCompanyQuestions } from "@/lib/company-questions";
+import { cleanAiResponse } from "@/lib/helpers";
 
 interface FormMockInterviewProps {
   initialData: Interview | null;
@@ -58,6 +60,7 @@ export const FormMockInterview = ({ initialData }: FormMockInterviewProps) => {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {},
+    mode: "onChange",
   });
 
   const { isValid, isSubmitting } = form.formState;
@@ -65,6 +68,7 @@ export const FormMockInterview = ({ initialData }: FormMockInterviewProps) => {
   const [resumeSkills, setResumeSkills] = useState<SkillMatch[]>([]);
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [preferredCompany, setPreferredCompany] = useState("");
+  const [functionality, setFunctionality] = useState<string | null>(null);
   const navigate = useNavigate();
   const { userId } = useAuth();
 
@@ -78,30 +82,8 @@ export const FormMockInterview = ({ initialData }: FormMockInterviewProps) => {
     ? { title: "Updated..!", description: "Changes saved successfully..." }
     : { title: "Created..!", description: "New Mock Interview created..." };
 
-  const cleanAiResponse = (responseText: string) => {
-    // Step 1: Trim any surrounding whitespace
-    let cleanText = responseText.trim();
 
-    // Step 2: Remove any occurrences of "json" or code block symbols (``` or `)
-    cleanText = cleanText.replace(/(json|```|`)/g, "");
-
-    // Step 3: Extract a JSON array by capturing text between square brackets
-    const jsonArrayMatch = cleanText.match(/\[.*\]/s);
-    if (jsonArrayMatch) {
-      cleanText = jsonArrayMatch[0];
-    } else {
-      throw new Error("No JSON array found in response");
-    }
-
-    // Step 4: Parse the clean JSON text into an array of objects
-    try {
-      return JSON.parse(cleanText);
-    } catch (error) {
-      throw new Error("Invalid JSON format: " + (error as Error)?.message);
-    }
-  };
-
-  const generateAiResponse = async (data: FormData) => {
+  const generateAiResponse = async (data: FormData, retries = 2, delayMs = 3000): Promise<any[]> => {
     const prompt = `
         As an experienced prompt engineer, generate a JSON array containing 5 technical interview questions along with detailed answers based on the following job information. Each object in the array should have the fields "question" and "answer", formatted as follows:
 
@@ -122,25 +104,36 @@ export const FormMockInterview = ({ initialData }: FormMockInterviewProps) => {
         `;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000); // Increased timeout to 20 seconds
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 seconds timeout
 
     try {
-      console.log("Sending prompt to AI:", prompt); // Log the prompt being sent
+      console.log("Sending prompt to AI:", prompt);
       const aiResult = await chatSession.sendMessage(prompt, { signal: controller.signal });
       
-      // Log the response from the AI
-      console.log("AI Response:", aiResult);
-
       const cleanedResponse = cleanAiResponse(aiResult.response.text());
       return cleanedResponse;
-    } catch (error) {
-      console.error("Error generating AI response:", error); // Log the full error object
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error("Request timed out. Please try again.");
+    } catch (error: any) {
+      console.error("Error generating AI response:", error);
+      
+      // Auto-retry specifically for 429 Quota Exceeded Errors
+      if (retries > 0 && error?.message?.includes('429')) {
+        console.warn(`Hit Gemini rate limit. Retrying in ${delayMs}ms. Retries left: ${retries}`);
+        await new Promise((res) => setTimeout(res, delayMs));
+        return generateAiResponse(data, retries - 1, delayMs * 2);
       }
-      throw new Error(`Failed to generate AI response: ${error instanceof Error ? error.message : "Unknown error"}. Please try again.`);
+      
+      // Fallback questions to prevent complete application blockage
+      console.warn("AI Generation failed completely. Injecting generic mock fallback questions.");
+      toast.info("API Quota Reached: Generating standard technical questions.");
+      return [
+        { question: `Can you walk me through your experience as a ${data.position || "professional"}?`, answer: "The candidate should clearly structure their background, focusing on relevant timeline details." },
+        { question: `Describe a time you used ${data.techStack || "these technologies"} to solve a complex problem.`, answer: "Look for a STAR method response detailing a specific technical challenge and actionable resolution." },
+        { question: "How do you handle disagreements on system architecture or code structure with your team?", answer: "Focus on communication, adaptability, and data-driven logical decision making." },
+        { question: "What is your approach to testing and ensuring code quality before deploying?", answer: "They should mention unit tests, edge case considerations, CI/CD integrations, and code reviews." },
+        { question: `Why do you feel you are the perfect fit for this specific role?`, answer: "Candidate should align their past experience practically against the job's daily requirements." }
+      ];
     } finally {
-      clearTimeout(timeoutId); // Clear the timeout
+      clearTimeout(timeoutId);
     }
   };
 
@@ -148,7 +141,38 @@ export const FormMockInterview = ({ initialData }: FormMockInterviewProps) => {
     try {
       setLoading(true);
 
-      const aiResult = await generateAiResponse(data);
+      let aiResult: any[] = [];
+      
+      // If user selected Company DB functionality and provided a company
+      if (functionality === "company-questions" && data.preferredCompany) {
+        toast.info("Fetching from Company Database...");
+        try {
+          const companyDbQs = await getCompanyQuestions(data.preferredCompany, data.position);
+          let matchQs = companyDbQs;
+          
+          if (matchQs.length === 0) {
+            // fallback to any questions for that company if role doesn't match
+            matchQs = await getCompanyQuestions(data.preferredCompany);
+          }
+
+          if (matchQs.length > 0) {
+            aiResult = matchQs.slice(0, 5).map(q => ({
+              question: q.question,
+              answer: q.exampleAnswer || "Please provide a structured answer highlighting your experience."
+            }));
+            toast.success("Loaded questions exclusively from Enterprise DB!");
+          } else {
+            toast.warning(`No questions found in DB for ${data.preferredCompany}. Falling back to AI...`);
+            aiResult = await generateAiResponse(data);
+          }
+        } catch (e) {
+          console.error("DB fetch failed, using AI fallback", e);
+          aiResult = await generateAiResponse(data);
+        }
+      } else {
+        // Standard AI Mock Interview functionality
+        aiResult = await generateAiResponse(data);
+      }
       
       // Fetch skill-based questions from database if resume skills were extracted
       let skillQuestions: any[] = [];
@@ -178,34 +202,38 @@ export const FormMockInterview = ({ initialData }: FormMockInterviewProps) => {
         }
       }
 
+      const finalPreferredCompany = data.preferredCompany || preferredCompany;
+
       if (initialData) {
         // update
-        if (isValid) {
-          await updateDoc(doc(db, "interviews", initialData?.id), {
-            questions: aiResult,
-            ...(skillQuestions.length > 0 && { skillQuestions }),
-            ...data,
-            difficulty,
-            ...(preferredCompany && { preferredCompany }),
-            updatedAt: serverTimestamp(),
-          }).catch((error) => console.log(error));
-          toast(toastMessage.title, { description: toastMessage.description });
-        }
+        await updateDoc(doc(db, "interviews", initialData?.id), {
+          position: data.position,
+          description: data.description,
+          experience: data.experience,
+          techStack: data.techStack,
+          questions: aiResult,
+          ...(skillQuestions.length > 0 && { skillQuestions }),
+          difficulty,
+          ...(finalPreferredCompany && { preferredCompany: finalPreferredCompany }),
+          updatedAt: serverTimestamp(),
+        }).catch((error) => console.log(error));
+        toast(toastMessage.title, { description: toastMessage.description });
       } else {
         // create a new mock interview
-        if (isValid) {
-          await addDoc(collection(db, "interviews"), {
-            ...data,
-            userId,
-            questions: aiResult,
-            ...(skillQuestions.length > 0 && { skillQuestions }),
-            difficulty,
-            ...(preferredCompany && { preferredCompany }),
-            createdAt: serverTimestamp(),
-          });
+        await addDoc(collection(db, "interviews"), {
+          position: data.position,
+          description: data.description,
+          experience: data.experience,
+          techStack: data.techStack,
+          userId,
+          questions: aiResult,
+          ...(skillQuestions.length > 0 && { skillQuestions }),
+          difficulty,
+          ...(finalPreferredCompany && { preferredCompany: finalPreferredCompany }),
+          createdAt: serverTimestamp(),
+        });
 
-          toast(toastMessage.title, { description: toastMessage.description });
-        }
+        toast(toastMessage.title, { description: toastMessage.description });
       }
 
       navigate("/generate", { replace: true });
@@ -253,6 +281,7 @@ export const FormMockInterview = ({ initialData }: FormMockInterviewProps) => {
 
       <FormProvider {...form}>
         <form
+          aria-label="Interview Form"
           onSubmit={form.handleSubmit(onSubmit)}
           className="w-full p-8 rounded-lg flex-col flex items-start justify-start gap-6 shadow-md "
         >
@@ -276,8 +305,12 @@ export const FormMockInterview = ({ initialData }: FormMockInterviewProps) => {
                 }
               }}
               onDifficultyChange={(diff) => setDifficulty(diff)}
-              onCompanyChange={(company) => setPreferredCompany(company)}
+              onCompanyChange={(company) => {
+                setPreferredCompany(company);
+                form.setValue("preferredCompany", company);
+              }}
               onFunctionalitySelect={(func) => {
+                setFunctionality(func);
                 console.log("Functionality selected:", func);
               }}
             />

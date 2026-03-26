@@ -99,23 +99,29 @@ export const AnalyticsDashboard = ({ userId: propUserId }: { userId?: string }) 
       performanceByDate[date].push(rating);
     };
 
+    const getDateObj = (ts: any) => {
+      if (!ts) return new Date();
+      if (typeof ts.toDate === "function") return ts.toDate();
+      return new Date(ts);
+    };
+
     // Regular feedbacks
     feedbacks.forEach((fb) => {
-      const date = new Date(fb.createdAt.toDate()).toLocaleDateString();
+      const date = getDateObj(fb.createdAt).toLocaleDateString();
       addToPerformance(date, fb.rating);
     });
 
     // Proctor sessions (normalized)
     proctorSessions.forEach((session) => {
       if (session.status === "completed") {
-        const date = new Date((session.endTime || session.createdAt).toDate()).toLocaleDateString();
+        const date = getDateObj(session.endTime || session.createdAt).toLocaleDateString();
         addToPerformance(date, session.score / 10);
       }
     });
 
     // Company question attempts
     companyAttempts.forEach((attempt) => {
-      const date = new Date(attempt.createdAt.toDate()).toLocaleDateString();
+      const date = getDateObj(attempt.createdAt).toLocaleDateString();
       addToPerformance(date, attempt.rating);
     });
 
@@ -175,7 +181,8 @@ export const AnalyticsDashboard = ({ userId: propUserId }: { userId?: string }) 
   const completedInterviews = 
     interviews.filter((i) => {
       const interviewFeedbacks = feedbacks.filter((f) => f.mockIdRef === i.id);
-      return interviewFeedbacks.length === (i.questions?.length || 0);
+      const totalQuestionsExpected = (i.questions?.length || 0) + (i.skillQuestions?.length || 0);
+      return interviewFeedbacks.length > 0 && interviewFeedbacks.length >= totalQuestionsExpected;
     }).length + proctorSessions.filter(s => s.status === "completed").length + companyAttempts.length;
 
   const trend =

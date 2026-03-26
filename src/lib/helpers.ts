@@ -84,3 +84,26 @@ export const ProtectedRoutes = [
     icon: "🌐",
   },
 ];
+
+export const cleanAiResponse = (responseText: string) => {
+  // Step 1: Trim any surrounding whitespace
+  let cleanText = responseText.trim();
+
+  // Step 2: Remove any occurrences of "json" or code block symbols (``` or `)
+  cleanText = cleanText.replace(/(json|```|`)/g, "");
+
+  // Step 3: Extract a JSON array by capturing text between square brackets
+  const jsonArrayMatch = cleanText.match(/\[.*\]/s);
+  if (jsonArrayMatch) {
+    cleanText = jsonArrayMatch[0];
+  } else {
+    throw new Error("No JSON array found in response");
+  }
+
+  // Step 4: Parse the clean JSON text into an array of objects
+  try {
+    return JSON.parse(cleanText);
+  } catch (error) {
+    throw new Error("Invalid JSON format: " + (error as Error)?.message);
+  }
+};

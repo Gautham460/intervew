@@ -28,7 +28,7 @@ import { useAuth } from "@clerk/clerk-react";
 
 export default function SelectRolePage() {
   const navigate = useNavigate();
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isSignedIn } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [secretCode, setSecretCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -37,6 +37,9 @@ export default function SelectRolePage() {
     if (role === "enterprise") {
       setIsModalOpen(true);
     } else {
+      sessionStorage.setItem("current_session_role", "candidate");
+      sessionStorage.removeItem("admin_preauth");
+      
       if (isSignedIn) {
         navigate("/generate");
       } else {
@@ -44,6 +47,7 @@ export default function SelectRolePage() {
       }
     }
   };
+
 
   const verifyCode = async () => {
     if (!secretCode) {
@@ -59,6 +63,7 @@ export default function SelectRolePage() {
       if (docSnap.exists() && docSnap.data().code === secretCode) {
         toast.success("Verification successful!");
         sessionStorage.setItem("admin_preauth", "true");
+        sessionStorage.setItem("current_session_role", "enterprise");
         setIsModalOpen(false);
         
         if (isSignedIn) {

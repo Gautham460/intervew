@@ -1,5 +1,6 @@
 import { db } from "@/config/firebase.config";
 import { collection, addDoc, updateDoc, doc, getDocs, query, where } from "firebase/firestore";
+import { chatSession } from "@/scripts";
 
 export interface StudyPlan {
   id?: string;
@@ -153,16 +154,79 @@ export async function generatePersonalizedStudyPlan(
   currentLevel: "beginner" | "intermediate" | "advanced",
   daysAvailable: number
 ): Promise<StudyPlan> {
-  try {
-    const topics = generateTopics(targetRole, currentLevel);
-    const milestones = generateMilestones(daysAvailable);
-    const startDate = new Date();
-    const endDate = new Date(startDate.getTime() + daysAvailable * 24 * 60 * 60 * 1000);
+  const startDate = new Date();
+  const endDate = new Date(startDate.getTime() + daysAvailable * 24 * 60 * 60 * 1000);
 
+  let topics: StudyTopic[] = [];
+  let milestones: Milestone[] = [];
+
+  try {
+    const prompt = `
+      Act as an expert career coach. Generate a structured JSON study plan for a ${currentLevel} aiming to become a ${targetRole} over a period of ${daysAvailable} days. 
+      The JSON must contain two keys: "topics" and "milestones". 
+      
+      "topics" is an array of objects where each object has:
+      - "name": String (topic name)
+      - "description": String (brief what to learn)
+      - "estimatedHours": Number (hours to spend)
+      - "practiceQuestions": Number (suggested questions to solve)
+      - "resources": Array of objects { "title": String, "type": "article" | "video" | "course" | "book" | "practice" } (max 2 resources per topic)
+
+      "milestones" is an array of objects representing progress checkpoints where each object has:
+      - "title": String (milestone name)
+      - "description": String
+      - "dayOffset": Number (number of days from start date this milestone should be complete)
+
+      Keep topics comprehensive but realistic for the timeline. Return ONLY the raw JSON without formatting ticks.
+    `;
+
+    const result = await chatSession.sendMessage(prompt);
+    let cleanText = result.response.text().replace(/(json|```|`)/g, "").trim();
+    
+    // Safely extract the JSON part in case the model wraps it in conversational text
+    const jsonStart = cleanText.indexOf('{');
+    const jsonEnd = cleanText.lastIndexOf('}');
+    if (jsonStart >= 0 && jsonEnd > jsonStart) {
+      cleanText = cleanText.substring(jsonStart, jsonEnd + 1);
+    }
+
+    const parsed = JSON.parse(cleanText);
+
+    topics = (parsed.topics || []).map((t: any, i: number) => ({
+      id: "topic-" + i + "-" + Date.now(),
+      name: t.name || "General Topic",
+      description: t.description || "",
+      estimatedHours: Number(t.estimatedHours) || 5,
+      practiceQuestions: Number(t.practiceQuestions) || 10,
+      resources: (t.resources || []).map((r: any) => ({
+        title: r.title || "Study Guide",
+        type: ["article", "video", "course", "book", "practice"].includes(r.type) ? r.type : "article",
+        completed: false
+      })),
+      completed: false
+    }));
+
+    milestones = (parsed.milestones || []).map((m: any, i: number) => ({
+      id: "milestone-" + i + "-" + Date.now(),
+      title: m.title || "Milestone Checkpoint",
+      description: m.description || "",
+      targetDate: new Date(startDate.getTime() + Math.min(Number(m.dayOffset) || daysAvailable, daysAvailable) * 24 * 60 * 60 * 1000),
+      completed: false
+    }));
+
+    if (topics.length === 0) throw new Error("AI returned empty topics");
+
+  } catch (error) {
+    console.error("AI Study Plan Generation failed, relying on safe fallback:", error);
+    topics = generateTopics(targetRole, currentLevel);
+    milestones = generateMilestones(daysAvailable);
+  }
+
+  try {
     return {
       userId,
-      title: `${targetRole} Interview Preparation - ${daysAvailable} Days`,
-      goal: `Prepare for ${targetRole} interviews`,
+      title: `${targetRole.replace(/\b\w/g, l => l.toUpperCase())} ${daysAvailable}-Day Study Track`,
+      goal: `Master ${targetRole} concepts and prepare for technical interviews`,
       difficulty: currentLevel === "advanced" ? "hard" : currentLevel === "intermediate" ? "medium" : "easy",
       duration: daysAvailable,
       startDate,
