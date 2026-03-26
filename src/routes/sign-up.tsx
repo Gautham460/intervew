@@ -3,7 +3,8 @@ import { dark } from "@clerk/themes";
 
 export const SignUpPage = () => {
   return <SignUp 
-    path="/signup" 
+    routing="path"
+    path="/intervew/signup" 
     appearance={{
       baseTheme: dark,
       variables: {

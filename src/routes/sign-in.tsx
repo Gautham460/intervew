@@ -36,7 +36,8 @@ export const SignInPage = () => {
           </div>
         )}
         <SignIn 
-          path="/signin" 
+          routing="path"
+          path="/intervew/signin" 
           forceRedirectUrl={role === "enterprise" ? "/enterprise" : "/generate"}
           appearance={{
             baseTheme: dark,
