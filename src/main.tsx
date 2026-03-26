@@ -32,7 +32,14 @@ if (!PUBLISHABLE_KEY) {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+    <ClerkProvider 
+      publishableKey={PUBLISHABLE_KEY} 
+      afterSignOutUrl="/intervew/"
+      signInUrl="/intervew/signin"
+      signUpUrl="/intervew/signup"
+      signInFallbackRedirectUrl="/intervew/generate"
+      signUpFallbackRedirectUrl="/intervew/generate"
+    >
       <App />
       <ToasterProvider />
     </ClerkProvider>

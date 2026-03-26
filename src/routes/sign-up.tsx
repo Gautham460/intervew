@@ -5,6 +5,8 @@ export const SignUpPage = () => {
   return <SignUp 
     routing="path"
     path="/intervew/signup" 
+    signInUrl="/intervew/signin"
+    forceRedirectUrl="/intervew/generate"
     appearance={{
       baseTheme: dark,
       variables: {
