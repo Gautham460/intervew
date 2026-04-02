@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "start": "vite preview --port $PORT --host"
+    "start": "npx serve dist -s -p $PORT"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.22.6",
