@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "start": "vite preview --port $PORT --host"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.22.6",
