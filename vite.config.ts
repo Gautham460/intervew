@@ -17,6 +17,6 @@ export default defineConfig({
     globals: true,
   },
   preview: {
-    allowedHosts: true
+    allowedHosts: ["intervew-1.onrender.com", ".onrender.com"]
   }
 });
