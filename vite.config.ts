@@ -16,4 +16,7 @@ export default defineConfig({
     setupFiles: ['./setupTests.ts'],
     globals: true,
   },
+  preview: {
+    allowedHosts: ["intervew.onrender.com", "intervue.onrender.com"]
+  }
 });
