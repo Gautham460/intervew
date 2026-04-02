@@ -4,9 +4,9 @@ import { dark } from "@clerk/themes";
 export const SignUpPage = () => {
   return <SignUp 
     routing="path"
-    path="/intervew/signup" 
-    signInUrl="/intervew/signin"
-    forceRedirectUrl="/intervew/generate"
+    path="/signup" 
+    signInUrl="/signin"
+    forceRedirectUrl="/generate"
     appearance={{
       baseTheme: dark,
       variables: {

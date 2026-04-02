@@ -45,26 +45,19 @@ const HomePage = () => {
     <div className="flex flex-col min-h-screen bg-black text-white">
       {/* Main content */}
       <section className="hero flex-grow flex items-center justify-center">
-        <div className="hero__column">
-          <h1 className="h1 hero__heading">
-            <span className="hero__heading-gradient">Intelligent</span>
+        <div className="hero__column flex-1 flex flex-col justify-center items-center text-center max-w-3xl mx-auto">
+          <h1 className="h1 hero__heading leading-tight mb-6">
+            <span className="hero__heading-gradient block mb-2">Intelligent</span>
             Interview Preparation Platform
           </h1>
-          <p className="text-gray-300 text-lg mb-6">
+          <p className="text-gray-300 text-xl mb-10 max-w-2xl px-4">
             Practice mock interviews, get AI feedback, and track your progress with real-time analytics.
           </p>
-          <Link to={userId ? "/generate" : "/select-role"} className="w-full">
-            <Button className="w-3/4 text-lg py-6">
-              {userId ? "Start Interview" : "Get Started"} <Sparkles className="ml-2" />
+          <Link to={userId ? "/generate" : "/select-role"} className="w-full max-w-md">
+            <Button className="w-full text-lg py-6 shadow-xl shadow-emerald-900/20 hover:scale-105 transition-transform">
+              {userId ? "Start Interview" : "Get Started"} <Sparkles className="ml-2 w-5 h-5" />
             </Button>
           </Link>
-        </div>
-        <div className="hero__column">
-          <img
-            className="hero__graphic w-[500px] h-[500px] "
-            src="src/routes/abstract-shapes.png"
-            alt="abstract shapes"
-          />
         </div>
       </section>
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { db } from "@/config/firebase.config";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { UserAnswer } from "@/types";
 import { Headings } from "@/components/headings";
 import { Separator } from "@/components/ui/separator";
@@ -18,25 +18,24 @@ export const EnterpriseDashboard = () => {
   const [dbStatus, setDbStatus] = useState({ questions: 0, companies: 0 });
 
   useEffect(() => {
-    const fetchEnterpriseData = async () => {
-      try {
-        const [interviewSnap, feedbackSnap, proctorSnap, companySnap, questionsSnap] = await Promise.all([
-          getDocs(collection(db, "interviews")),
-          getDocs(collection(db, "userAnswers")),
-          getDocs(collection(db, "proctor_sessions")),
-          getDocs(collection(db, "companyQuestionAttempts")),
-          getDocs(collection(db, "skillQuestions"))
-        ]);
+    let unsubscribeUsers: () => void;
+    let unsubscribeInterviews: () => void;
+    let unsubscribeFeedbacks: () => void;
+    let unsubscribeProctor: () => void;
+    let unsubscribeCompany: () => void;
+    let unsubscribeQuestions: () => void;
 
-        const interviewList = interviewSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
-        const feedbackList = feedbackSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
-        const proctorList = proctorSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
-        const companyList = companySnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
-        
-        // Setup stats
+    const setupLiveSync = () => {
+      let userList: any[] = [];
+      let interviewList: any[] = [];
+      let feedbackList: any[] = [];
+      let proctorList: any[] = [];
+      let companyList: any[] = [];
+      let questionsList: any[] = [];
+
+      const updateDashboard = () => {
         let totalQuestions = 0;
-        questionsSnap.forEach(doc => {
-          const data = doc.data();
+        questionsList.forEach(data => {
           totalQuestions += (data.questions?.length || 0);
         });
         setDbStatus({ 
@@ -51,25 +50,32 @@ export const EnterpriseDashboard = () => {
         ];
         setFeedbacks(allFeedbacks as any);
 
-        // Group by student across ALL activities
         const studentMap = new Map<string, any>();
         
-        const processUser = (userId: string, activity: any) => {
+        // Pre-fill with all registered real users (this ensures Huzzain and others show up even with 0 activities)
+        // This also acts as our filter against legacy mock data.
+        userList.forEach(u => {
+          studentMap.set(u.id, {
+            id: u.id,
+            email: u.email || `${u.id.slice(0, 8)}...`,
+            name: u.name || "Anonymous User",
+            sessions: 0,
+            functions: new Set<string>(),
+            lastActive: u.updateAt || u.createdAt || new Date()
+          });
+        });
+        
+        const processUser = (userId: string, activity: any, functionName: string) => {
           if (!userId) return;
-          const activityDate = activity.endTime || activity.createdAt;
+          // If the userId from the activity doesn't exist in our actual userList, it's mock/legacy data. Ignore it.
+          if (!studentMap.has(userId)) return;
           
-          if (!studentMap.has(userId)) {
-            studentMap.set(userId, {
-              id: userId,
-              sessions: 0,
-              lastActive: activityDate,
-            });
-          }
+          const activityDate = activity.endTime || activity.createdAt;
           
           const entry = studentMap.get(userId);
           entry.sessions++;
+          entry.functions.add(functionName);
           
-          // Update lastActive if this activity is newer
           const currentLast = entry.lastActive?.toDate?.() || new Date(entry.lastActive || 0);
           const activeDate = activityDate?.toDate?.() || new Date(activityDate || 0);
           
@@ -78,27 +84,63 @@ export const EnterpriseDashboard = () => {
           }
         };
 
-        interviewList.forEach(i => processUser(i.userId, i));
-        proctorList.forEach(s => processUser(s.userId, s));
-        companyList.forEach(c => processUser(c.userId, c));
+        interviewList.forEach(i => processUser(i.userId, i, "Mock Interview"));
+        proctorList.forEach(s => processUser(s.userId, s, "Proctored Interview"));
+        companyList.forEach(c => processUser(c.userId, c, "Company Question"));
 
-        // Sort students by most recent activity
         const studentList = Array.from(studentMap.values()).sort((a, b) => {
           const dateA = a.lastActive?.toDate?.() || new Date(a.lastActive || 0);
           const dateB = b.lastActive?.toDate?.() || new Date(b.lastActive || 0);
           return dateB.getTime() - dateA.getTime();
         });
 
-        setStudents(studentList);
-
-      } catch (error) {
-        console.error("Error fetching enterprise data:", error);
-      } finally {
+        // Convert Set to Array for rendering
+        setStudents(studentList.map(s => ({...s, functions: Array.from(s.functions)})));
         setLoading(false);
-      }
+      };
+
+      unsubscribeUsers = onSnapshot(collection(db, "users"), (snap: any) => {
+        userList = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+        updateDashboard();
+      });
+
+      unsubscribeInterviews = onSnapshot(collection(db, "interviews"), (snap: any) => {
+        interviewList = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+        updateDashboard();
+      });
+
+      unsubscribeFeedbacks = onSnapshot(collection(db, "userAnswers"), (snap: any) => {
+        feedbackList = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+        updateDashboard();
+      });
+
+      unsubscribeProctor = onSnapshot(collection(db, "proctor_sessions"), (snap: any) => {
+        proctorList = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+        updateDashboard();
+      });
+
+      unsubscribeCompany = onSnapshot(collection(db, "companyQuestionAttempts"), (snap: any) => {
+        companyList = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+        updateDashboard();
+      });
+
+      unsubscribeQuestions = onSnapshot(collection(db, "skillQuestions"), (snap: any) => {
+        questionsList = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+        updateDashboard();
+      });
     };
 
-    fetchEnterpriseData();
+    setupLiveSync();
+
+    return () => {
+      // @ts-ignore
+      if (typeof unsubscribeUsers === "function") unsubscribeUsers();
+      if (unsubscribeInterviews) unsubscribeInterviews();
+      if (unsubscribeFeedbacks) unsubscribeFeedbacks();
+      if (unsubscribeProctor) unsubscribeProctor();
+      if (unsubscribeCompany) unsubscribeCompany();
+      if (unsubscribeQuestions) unsubscribeQuestions();
+    };
   }, []);
 
   if (loading) {
@@ -191,8 +233,11 @@ export const EnterpriseDashboard = () => {
                           return (
                             <tr key={student.id} className="hover:bg-blue-50/50 transition-colors border-b last:border-0">
                               <td className="px-4 py-6">
-                                <div className="font-mono text-xs text-slate-900 font-bold mb-1">
-                                  {student.id.slice(0, 8)}...{student.id.slice(-4)}
+                                <div className="font-semibold text-slate-900 mb-1">
+                                  {student.name}
+                                </div>
+                                <div className="text-xs text-slate-500 mb-1">
+                                  {student.email}
                                 </div>
                                 <div className="text-[10px] text-slate-400 flex items-center gap-1 uppercase tracking-wider">
                                   <Activity className="w-3 h-3" /> Latest: {(student.lastActive as any)?.toDate ? (student.lastActive as any).toDate().toLocaleDateString() : "Recent"} 
@@ -200,11 +245,20 @@ export const EnterpriseDashboard = () => {
                               </td>
                               <td className="px-4 py-6">
                                 <div className="flex items-center gap-4">
-                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 px-3">
-                                    {student.sessions} activities
-                                  </Badge>
-                                  <div className="flex flex-col">
-                                    <span className="text-[10px] text-slate-400 uppercase">Avg Score</span>
+                                  <div className="flex flex-col gap-2">
+                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 px-3 w-fit">
+                                      {student.sessions} Activities Total
+                                    </Badge>
+                                    <div className="flex flex-wrap gap-1 max-w-[200px]">
+                                      {(student.functions || []).map((func: string) => (
+                                        <Badge key={func} variant="secondary" className="text-[10px] px-1.5 py-0 border-slate-200">
+                                          {func}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col border-l pl-4 border-slate-200">
+                                    <span className="text-[10px] text-slate-400 uppercase">Avg Result</span>
                                     <span className={cn(
                                       "text-sm font-bold",
                                       Number(avgRating) >= 7 ? "text-emerald-600" : Number(avgRating) >= 4 ? "text-amber-600" : "text-slate-600"

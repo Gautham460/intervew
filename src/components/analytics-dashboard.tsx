@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/config/firebase.config";
 import { useAuth } from "@clerk/clerk-react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { Interview, UserAnswer } from "@/types";
 import {
   LineChart,
@@ -22,6 +22,7 @@ import {
 import { LoaderPage } from "@/routes/loader-page";
 import { Badge } from "./ui/badge";
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const AnalyticsDashboard = ({ userId: propUserId }: { userId?: string }) => {
   const { userId: authUserId } = useAuth();
@@ -33,54 +34,81 @@ export const AnalyticsDashboard = ({ userId: propUserId }: { userId?: string }) 
   const [companyAttempts, setCompanyAttempts] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [performanceData, setPerformanceData] = useState<any[]>([]);
+  const [sessionHistory, setSessionHistory] = useState<any[]>([]);
+  const [functionalityComparison, setFunctionalityComparison] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!userId) return;
+    if (!userId) return;
 
-      try {
-        // Fetch data in parallel
-        const [interviewSnap, feedbackSnap, proctorSnap, companySnap] = await Promise.all([
-          getDocs(query(collection(db, "interviews"), where("userId", "==", userId))),
-          getDocs(query(collection(db, "userAnswers"), where("userId", "==", userId))),
-          getDocs(query(collection(db, "proctor_sessions"), where("userId", "==", userId))),
-          getDocs(query(collection(db, "companyQuestionAttempts"), where("userId", "==", userId))),
-        ]);
+    let unsubscribeInterviews: () => void;
+    let unsubscribeFeedbacks: () => void;
+    let unsubscribeProctor: () => void;
+    let unsubscribeCompany: () => void;
 
-        const interviewList = interviewSnap.docs.map((doc) => ({
+    let interviewList: Interview[] = [];
+    let feedbackList: UserAnswer[] = [];
+    let proctorList: any[] = [];
+    let companyList: any[] = [];
+
+    const updateCharts = () => {
+      setInterviews(interviewList);
+      setFeedbacks(feedbackList);
+      setProctorSessions(proctorList);
+      setCompanyAttempts(companyList);
+      processChartsData(interviewList, feedbackList, proctorList, companyList);
+      setLoading(false);
+    };
+
+    unsubscribeInterviews = onSnapshot(
+      query(collection(db, "interviews"), where("userId", "==", userId)),
+      (snap: any) => {
+        interviewList = snap.docs.map((doc: any) => ({
           id: doc.id,
           ...doc.data(),
         })) as Interview[];
-        setInterviews(interviewList);
+        updateCharts();
+      }
+    );
 
-        const feedbackList = feedbackSnap.docs.map((doc) => ({
+    unsubscribeFeedbacks = onSnapshot(
+      query(collection(db, "userAnswers"), where("userId", "==", userId)),
+      (snap: any) => {
+        feedbackList = snap.docs.map((doc: any) => ({
           id: doc.id,
           ...doc.data(),
         })) as UserAnswer[];
-        setFeedbacks(feedbackList);
-
-        const proctorList = proctorSnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setProctorSessions(proctorList);
-
-        const companyList = companySnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setCompanyAttempts(companyList);
-
-        // Process data for charts
-        processChartsData(interviewList, feedbackList, proctorList, companyList);
-      } catch (error) {
-        console.error("Error fetching analytics:", error);
-      } finally {
-        setLoading(false);
+        updateCharts();
       }
-    };
+    );
 
-    fetchData();
+    unsubscribeProctor = onSnapshot(
+      query(collection(db, "proctor_sessions"), where("userId", "==", userId)),
+      (snap: any) => {
+        proctorList = snap.docs.map((doc: any) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        updateCharts();
+      }
+    );
+
+    unsubscribeCompany = onSnapshot(
+      query(collection(db, "companyQuestionAttempts"), where("userId", "==", userId)),
+      (snap: any) => {
+        companyList = snap.docs.map((doc: any) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        updateCharts();
+      }
+    );
+
+    return () => {
+      if (unsubscribeInterviews) unsubscribeInterviews();
+      if (unsubscribeFeedbacks) unsubscribeFeedbacks();
+      if (unsubscribeProctor) unsubscribeProctor();
+      if (unsubscribeCompany) unsubscribeCompany();
+    };
   }, [userId]);
 
   const processChartsData = (
@@ -164,6 +192,50 @@ export const AnalyticsDashboard = ({ userId: propUserId }: { userId?: string }) 
     ];
 
     setPerformanceData(performanceDistribution.filter((d) => d.value > 0));
+
+    // Prepare Comparison Chart Data
+    const mockAvg = feedbacks.length > 0 
+      ? (feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length) 
+      : 0;
+    const proctorAvg = proctorSessions.filter(s => s.status === "completed").length > 0 
+      ? (proctorSessions.filter(s => s.status === "completed").reduce((sum, s) => sum + (s.score / 10), 0) / proctorSessions.filter(s => s.status === "completed").length)
+      : 0;
+    const companyAvg = companyAttempts.length > 0
+      ? (companyAttempts.reduce((sum, a) => sum + a.rating, 0) / companyAttempts.length)
+      : 0;
+
+    const comparisonData = [
+      { name: "Mock Interviews", avg: Math.round(mockAvg * 10) / 10, fill: "#6366f1" },
+      { name: "Proctored Exams", avg: Math.round(proctorAvg * 10) / 10, fill: "#10b981" },
+      { name: "Company Qs", avg: Math.round(companyAvg * 10) / 10, fill: "#f59e0b" },
+    ].filter(d => d.avg > 0);
+    setFunctionalityComparison(comparisonData);
+
+    // Prepare History Data
+    const history = [
+      ...feedbacks.map(f => ({
+        id: f.id,
+        type: "Mock Interview",
+        date: getDateObj(f.createdAt),
+        score: f.rating,
+        detail: f.question?.slice(0, 50) + "..."
+      })),
+      ...proctorSessions.filter(s => s.status === "completed").map(s => ({
+        id: s.id,
+        type: "Proctored Exam",
+        date: getDateObj(s.endTime || s.createdAt),
+        score: s.score / 10,
+        detail: `Exam Score: ${s.score}%`
+      })),
+      ...companyAttempts.map(a => ({
+        id: a.id,
+        type: "Company Question",
+        date: getDateObj(a.createdAt),
+        score: a.rating,
+        detail: a.question?.slice(0, 50) + "..."
+      }))
+    ].sort((a, b) => b.date.getTime() - a.date.getTime());
+    setSessionHistory(history);
   };
 
   if (loading) {
@@ -314,6 +386,30 @@ export const AnalyticsDashboard = ({ userId: propUserId }: { userId?: string }) 
             </CardContent>
           </Card>
         )}
+
+        {/* Functionality Comparison Chart */}
+        {functionalityComparison.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Functionality Comparison</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={functionalityComparison} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis type="number" domain={[0, 10]} fontSize={10} />
+                  <YAxis dataKey="name" type="category" width={100} fontSize={10} />
+                  <Tooltip />
+                  <Bar dataKey="avg" radius={[0, 4, 4, 0]} name="Avg Score">
+                    {functionalityComparison.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Questions Attempted Chart */}
@@ -335,6 +431,147 @@ export const AnalyticsDashboard = ({ userId: propUserId }: { userId?: string }) 
           </CardContent>
         </Card>
       )}
+
+      {/* Individual Functionality Analysis */}
+      <div className="space-y-4 pt-4 border-t">
+        <h3 className="text-lg font-semibold text-slate-800">Functionality Statistics</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* Mock Interviews */}
+          <Card className="bg-indigo-50/50 border-indigo-100">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-indigo-800">Mock Interviews</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Avg Score:</span>
+                  <span className="font-bold text-indigo-700">
+                    {feedbacks.length > 0 
+                      ? (feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length).toFixed(1) 
+                      : "0.0"} / 10
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Questions Answered:</span>
+                  <span className="font-bold text-slate-700">{feedbacks.length}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Proctored Sessions */}
+          <Card className="bg-emerald-50/50 border-emerald-100">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-emerald-800">Proctored Exams</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Avg Score:</span>
+                  <span className="font-bold text-emerald-700">
+                    {proctorSessions.filter(s => s.status === "completed").length > 0 
+                      ? (proctorSessions.filter(s => s.status === "completed").reduce((sum, s) => sum + (s.score / 10), 0) / proctorSessions.filter(s => s.status === "completed").length).toFixed(1) 
+                      : "0.0"} / 10
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Exams Completed:</span>
+                  <span className="font-bold text-slate-700">{proctorSessions.filter(s => s.status === "completed").length}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Company Questions */}
+          <Card className="bg-orange-50/50 border-orange-100">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-orange-800">Company Questions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Avg Score:</span>
+                  <span className="font-bold text-orange-700">
+                    {companyAttempts.length > 0 
+                      ? (companyAttempts.reduce((sum, a) => sum + a.rating, 0) / companyAttempts.length).toFixed(1) 
+                      : "0.0"} / 10
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Total Attempts:</span>
+                  <span className="font-bold text-slate-700">{companyAttempts.length}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Detailed Activity Session History */}
+      <Card className="border-slate-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Activity Session History
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border border-slate-100 overflow-hidden">
+            <div className="max-h-[500px] overflow-y-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 text-slate-600 font-medium sticky top-0">
+                  <tr>
+                    <th className="px-4 py-3">Type</th>
+                    <th className="px-4 py-3">Details</th>
+                    <th className="px-4 py-3">Score</th>
+                    <th className="px-4 py-3 text-right">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {sessionHistory.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-10 text-center text-slate-400 italic">
+                        No individual session activity recorded yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    sessionHistory.map((session) => (
+                      <tr key={session.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-4 py-4">
+                          <Badge 
+                            variant="outline" 
+                            className={cn(
+                              "text-[10px] border-transparent",
+                              session.type === "Mock Interview" ? "bg-indigo-50 text-indigo-700" :
+                              session.type === "Proctored Exam" ? "bg-emerald-50 text-emerald-700" :
+                              "bg-orange-50 text-orange-700"
+                            )}>
+                            {session.type}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-4 text-slate-600 max-w-[250px] truncate">
+                          {session.detail}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={cn(
+                            "font-bold",
+                            session.score >= 8 ? "text-emerald-600" : session.score >= 5 ? "text-amber-600" : "text-red-500"
+                          )}>
+                            {session.score.toFixed(1)}/10
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-right text-slate-400 text-xs">
+                          {new Date(session.date).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

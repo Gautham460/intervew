@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useSearchParams } from "react-router-dom";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "@/config/firebase.config";
 import { UserAnswer } from "@/types";
 import { LoaderPage } from "./loader-page";
@@ -30,43 +30,61 @@ export const AnalyticsPage = () => {
   const [companyAttempts, setCompanyAttempts] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!targetUserId) return;
+    if (!targetUserId) return;
 
-      try {
-        const [, feedbackSnap, proctorSnap, companySnap] = await Promise.all([
-          getDocs(query(collection(db, "interviews"), where("userId", "==", targetUserId))),
-          getDocs(query(collection(db, "userAnswers"), where("userId", "==", targetUserId))),
-          getDocs(query(collection(db, "proctor_sessions"), where("userId", "==", targetUserId))),
-          getDocs(query(collection(db, "companyQuestionAttempts"), where("userId", "==", targetUserId))),
-        ]);
+    let unsubscribeFeedbacks: () => void;
+    let unsubscribeProctor: () => void;
+    let unsubscribeCompany: () => void;
 
-        const feedbackList = feedbackSnap.docs.map((doc) => ({
+    let feedbackList: UserAnswer[] = [];
+    let proctorList: any[] = [];
+    let companyList: any[] = [];
+
+    const updateMetrics = () => {
+      setFeedbacks(feedbackList);
+      setProctorSessions(proctorList);
+      setCompanyAttempts(companyList);
+      setLoading(false);
+    };
+
+    unsubscribeFeedbacks = onSnapshot(
+      query(collection(db, "userAnswers"), where("userId", "==", targetUserId)),
+      (snap: any) => {
+        feedbackList = snap.docs.map((doc: any) => ({
           id: doc.id,
           ...doc.data(),
         })) as UserAnswer[];
-
-        const proctorList = proctorSnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        const companyList = companySnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setFeedbacks(feedbackList);
-        setProctorSessions(proctorList);
-        setCompanyAttempts(companyList);
-      } catch (error) {
-        console.error("Error fetching analytics data:", error);
-      } finally {
-        setLoading(false);
+        updateMetrics();
       }
-    };
+    );
 
-    fetchData();
+    unsubscribeProctor = onSnapshot(
+      query(collection(db, "proctor_sessions"), where("userId", "==", targetUserId)),
+      (snap: any) => {
+        proctorList = snap.docs.map((doc: any) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        updateMetrics();
+      }
+    );
+
+    unsubscribeCompany = onSnapshot(
+      query(collection(db, "companyQuestionAttempts"), where("userId", "==", targetUserId)),
+      (snap: any) => {
+        companyList = snap.docs.map((doc: any) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        updateMetrics();
+      }
+    );
+
+    return () => {
+      if (unsubscribeFeedbacks) unsubscribeFeedbacks();
+      if (unsubscribeProctor) unsubscribeProctor();
+      if (unsubscribeCompany) unsubscribeCompany();
+    };
   }, [targetUserId]);
 
   const metrics = useMemo(

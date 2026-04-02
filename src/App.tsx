@@ -39,7 +39,7 @@ const App = () => {
   }, []);
 
   return (
-    <Router basename="/intervew">
+    <Router>
       <Routes>
         {/* public routes */}
         <Route element={<PublicLayout />}>

@@ -34,11 +34,11 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ClerkProvider 
       publishableKey={PUBLISHABLE_KEY} 
-      afterSignOutUrl="/intervew/"
-      signInUrl="/intervew/signin"
-      signUpUrl="/intervew/signup"
-      signInFallbackRedirectUrl="/intervew/generate"
-      signUpFallbackRedirectUrl="/intervew/generate"
+      afterSignOutUrl="/"
+      signInUrl="/signin"
+      signUpUrl="/signup"
+      signInFallbackRedirectUrl="/generate"
+      signUpFallbackRedirectUrl="/generate"
     >
       <App />
       <ToasterProvider />

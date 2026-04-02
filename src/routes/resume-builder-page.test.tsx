@@ -18,6 +18,25 @@ vi.mock('jspdf', () => ({
   })),
 }));
 
+vi.mock('@/lib/resume-analysis', () => ({
+  analyzeResume: vi.fn().mockResolvedValue({
+    overallScore: 85,
+    atsScore: 80,
+    contentScore: 85,
+    keywordScore: 75,
+    strengths: ['Strong React skills', 'Good experience'],
+    improvements: ['Add more metrics'],
+    missingKeywords: ['AWS'],
+  }),
+}));
+
+vi.mock('sonner', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 describe('ResumeBuilderPage', () => {
   it('renders the empty profile layout', () => {
     render(<ResumeBuilderPage />);

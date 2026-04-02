@@ -33,11 +33,11 @@ export interface ResumeSection {
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GOOGLE_AI_KEY || "");
 
-export async function analyzeResume(resumeText: string): Promise<ResumeAnalysis> {
+export async function analyzeResume(resumeText: string, targetRole?: string): Promise<ResumeAnalysis> {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const prompt = `You are an expert resume reviewer for tech interviews. Analyze this resume and provide comprehensive feedback.
+    const prompt = `You are an expert resume reviewer for tech interviews. Analyze this resume ${targetRole ? `for the target role of "${targetRole}"` : ""} and provide comprehensive feedback.
 
 Resume Content:
 "${resumeText}"
